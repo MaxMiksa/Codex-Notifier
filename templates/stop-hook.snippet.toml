@@ -4,7 +4,7 @@
 # codex-notifier managed block start
 Stop = [
   { hooks = [
-      { type = "command", command = ["pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:\\Users\\<YOU>\\.codex\\hooks\\notify-stop.ps1", "-DefaultCwd", "C:\\Users\\<YOU>\\Desktop\\default"], timeout_ms = 4000 }
+      { type = "command", command = ["pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:\\Users\\<YOU>\\.codex\\hooks\\notify-stop.ps1", "-DefaultCwd", "C:\\Users\\<YOU>\\Desktop\\default", "-Locale", "auto", "-LegalProfile", "global-minimal"], timeout_ms = 4000 }
     ]
   }
 ]

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codex-notifier.local/schemas/messages.schema.json",
+  "title": "Codex Notifier Locale Messages",
+  "type": "object",
+  "required": ["meta", "notifications", "legal", "installer", "doctor", "uninstall"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["locale", "dir", "supported_legal_profiles"],
+      "properties": {
+        "locale": { "type": "string" },
+        "dir": { "type": "string", "enum": ["ltr", "rtl"] },
+        "supported_legal_profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "notifications": {
+      "type": "object",
+      "required": [
+        "title_task_complete",
+        "time_completed",
+        "fallback_success",
+        "fallback_stop",
+        "fallback_unknown",
+        "body_template",
+        "summary_trim_prefixes",
+        "status_success",
+        "status_failure"
+      ],
+      "properties": {
+        "summary_trim_prefixes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "legal": {
+      "type": "object",
+      "required": [
+        "privacy_notice",
+        "local_processing_notice",
+        "no_upload_notice",
+        "audit_log_notice"
+      ],
+      "additionalProperties": true
+    },
+    "installer": { "type": "object", "additionalProperties": true },
+    "doctor": { "type": "object", "additionalProperties": true },
+    "uninstall": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": true
+}

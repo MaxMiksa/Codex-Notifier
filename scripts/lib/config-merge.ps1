@@ -12,17 +12,21 @@ function Get-ManagedStopHookBlock {
   param(
     [Parameter(Mandatory = $true)][string]$StopHookScriptPath,
     [Parameter(Mandatory = $true)][string]$DefaultCwd,
-    [int]$TimeoutMs = 4000
+    [int]$TimeoutMs = 4000,
+    [string]$Locale = 'auto',
+    [string]$LegalProfile = 'global-minimal'
   )
 
   $stopHookPathToml = ConvertTo-TomlBasicString -Value $StopHookScriptPath
   $defaultCwdToml = ConvertTo-TomlBasicString -Value $DefaultCwd
+  $localeToml = ConvertTo-TomlBasicString -Value $Locale
+  $legalProfileToml = ConvertTo-TomlBasicString -Value $LegalProfile
 
   return @"
 # codex-notifier managed block start
 Stop = [
   { hooks = [
-      { type = "command", command = ["pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $stopHookPathToml, "-DefaultCwd", $defaultCwdToml], timeout_ms = $TimeoutMs }
+      { type = "command", command = ["pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $stopHookPathToml, "-DefaultCwd", $defaultCwdToml, "-Locale", $localeToml, "-LegalProfile", $legalProfileToml], timeout_ms = $TimeoutMs }
     ]
   }
 ]
@@ -56,12 +60,19 @@ function Merge-CodexNotifierStopHook {
     [Parameter(Mandatory = $true)][AllowEmptyString()][string]$ConfigText,
     [Parameter(Mandatory = $true)][string]$StopHookScriptPath,
     [Parameter(Mandatory = $true)][string]$DefaultCwd,
-    [int]$TimeoutMs = 4000
+    [int]$TimeoutMs = 4000,
+    [string]$Locale = 'auto',
+    [string]$LegalProfile = 'global-minimal'
   )
 
   $lineEnding = Get-LineEnding -Text $ConfigText
   $normalized = $ConfigText.Replace("`r`n", "`n")
-  $managedBlock = Get-ManagedStopHookBlock -StopHookScriptPath $StopHookScriptPath -DefaultCwd $DefaultCwd -TimeoutMs $TimeoutMs
+  $managedBlock = Get-ManagedStopHookBlock `
+    -StopHookScriptPath $StopHookScriptPath `
+    -DefaultCwd $DefaultCwd `
+    -TimeoutMs $TimeoutMs `
+    -Locale $Locale `
+    -LegalProfile $LegalProfile
   [string[]]$managedLines = $managedBlock.Split("`n")
   $lines = if ([string]::IsNullOrEmpty($normalized)) { @() } else { @($normalized.Split("`n")) }
   $mutable = New-Object System.Collections.Generic.List[string]

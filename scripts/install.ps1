@@ -2,6 +2,8 @@
 param(
   [string]$CodexHome = (Join-Path $HOME '.codex'),
   [string]$DefaultCwd = '',
+  [string]$Locale = 'auto',
+  [string]$LegalProfile = 'global-minimal',
   [switch]$Force,
   [switch]$NoSmokeTest
 )
@@ -10,6 +12,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'lib\config-merge.ps1')
+. (Join-Path $PSScriptRoot 'lib\locale-resolver.ps1')
+. (Join-Path $PSScriptRoot 'lib\layout-direction.ps1')
+. (Join-Path $PSScriptRoot 'lib\i18n-core.ps1')
 
 function Resolve-EffectiveDefaultCwd {
   param([string]$Configured)
@@ -53,14 +58,37 @@ function Test-SameFileContent {
   return $sourceHash -eq $targetHash
 }
 
+function Copy-FileIfNeeded {
+  param(
+    [Parameter(Mandatory = $true)][string]$SourcePath,
+    [Parameter(Mandatory = $true)][string]$TargetPath,
+    [switch]$ForceCopy
+  )
+
+  $parent = Split-Path -Parent $TargetPath
+  if (-not (Test-Path -LiteralPath $parent)) {
+    New-Item -ItemType Directory -Path $parent -Force | Out-Null
+  }
+
+  $same = Test-SameFileContent -SourcePath $SourcePath -TargetPath $TargetPath
+  if (-not $same -or $ForceCopy.IsPresent) {
+    Copy-Item -LiteralPath $SourcePath -Destination $TargetPath -Force
+    return $true
+  }
+  return $false
+}
+
 function Invoke-StopHookSmokeTest {
   param(
     [Parameter(Mandatory = $true)][string]$StopHookPath,
-    [Parameter(Mandatory = $true)][string]$EffectiveDefaultCwd
+    [Parameter(Mandatory = $true)][string]$EffectiveDefaultCwd,
+    [Parameter(Mandatory = $true)][string]$LocaleEffective,
+    [Parameter(Mandatory = $true)][string]$DirEffective,
+    [Parameter(Mandatory = $true)][string]$LegalProfileEffective
   )
 
   $payload = '{"type":"smoketest","event":"smoketest","thread-id":"install-smoketest","turn-id":"install-smoketest"}'
-  $payload | & pwsh.exe -NoProfile -ExecutionPolicy Bypass -File $StopHookPath -DefaultCwd $EffectiveDefaultCwd
+  $payload | & pwsh.exe -NoProfile -ExecutionPolicy Bypass -File $StopHookPath -DefaultCwd $EffectiveDefaultCwd -Locale $LocaleEffective -Dir $DirEffective -LegalProfile $LegalProfileEffective
   return $LASTEXITCODE
 }
 
@@ -76,17 +104,32 @@ function Emit-ResultAndExit {
 }
 
 try {
+  $localeInfo = Resolve-NotifierLocale -Locale $Locale
+  $dirInfo = Resolve-NotifierDirection -Dir 'auto' -Locale $localeInfo.locale
+  $legalInfo = Resolve-NotifierLegalProfile -LegalProfile $LegalProfile
+  $effectiveLocale = [string]$localeInfo.locale
+  $effectiveDir = [string]$dirInfo.dir_effective
+  $effectiveLegalProfile = [string]$legalInfo.legal_profile
+
   $repoRoot = Split-Path -Path $PSScriptRoot -Parent
   $sourceStopHookPath = Join-Path $repoRoot 'hooks\notify-stop.ps1'
   $sourceClickHookPath = Join-Path $repoRoot 'hooks\notify-click-jump.ps1'
+  $sourceLibDir = Join-Path $repoRoot 'scripts\lib'
+  $sourceLocaleDir = Join-Path $repoRoot 'i18n\locales'
+  $sourceSchemaDir = Join-Path $repoRoot 'i18n\schema'
+
   if (-not (Test-Path -LiteralPath $sourceStopHookPath) -or -not (Test-Path -LiteralPath $sourceClickHookPath)) {
-    throw 'Missing hook scripts in repository. Expected hooks/notify-stop.ps1 and hooks/notify-click-jump.ps1.'
+    $missingHooksText = Get-I18nText -Key 'installer.error_missing_hooks' -Locale $effectiveLocale
+    throw $missingHooksText
   }
 
   $hooksDir = Join-Path $CodexHome 'hooks'
+  $hooksLibDir = Join-Path $hooksDir 'lib'
   $logsDir = Join-Path $hooksDir 'logs'
   $backupDir = Join-Path $CodexHome 'backup'
-  foreach ($dir in @($CodexHome, $hooksDir, $logsDir, $backupDir)) {
+  $codexLocaleDir = Join-Path $CodexHome 'i18n\locales'
+  $codexSchemaDir = Join-Path $CodexHome 'i18n\schema'
+  foreach ($dir in @($CodexHome, $hooksDir, $hooksLibDir, $logsDir, $backupDir, $codexLocaleDir, $codexSchemaDir)) {
     if (-not (Test-Path -LiteralPath $dir)) {
       New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
@@ -101,12 +144,36 @@ try {
       @{ source = $sourceStopHookPath; target = $targetStopHookPath },
       @{ source = $sourceClickHookPath; target = $targetClickHookPath }
     )) {
-    $same = Test-SameFileContent -SourcePath $pair.source -TargetPath $pair.target
-    if (-not $same -or $Force.IsPresent) {
-      Copy-Item -LiteralPath $pair.source -Destination $pair.target -Force
-      if (-not $same) {
-        $filesChanged = $true
-      }
+    if (Copy-FileIfNeeded -SourcePath $pair.source -TargetPath $pair.target -ForceCopy:$Force.IsPresent) {
+      $filesChanged = $true
+    }
+  }
+
+  $runtimeLibFiles = @(
+    'i18n-core.ps1',
+    'icu-message.ps1',
+    'locale-resolver.ps1',
+    'layout-direction.ps1',
+    'format-cldr.ps1'
+  )
+  foreach ($libName in $runtimeLibFiles) {
+    $sourceFile = Join-Path $sourceLibDir $libName
+    $targetFile = Join-Path $hooksLibDir $libName
+    if (Copy-FileIfNeeded -SourcePath $sourceFile -TargetPath $targetFile -ForceCopy:$Force.IsPresent) {
+      $filesChanged = $true
+    }
+  }
+
+  foreach ($localeFile in Get-ChildItem -LiteralPath $sourceLocaleDir -File -Filter '*.json') {
+    $targetFile = Join-Path $codexLocaleDir $localeFile.Name
+    if (Copy-FileIfNeeded -SourcePath $localeFile.FullName -TargetPath $targetFile -ForceCopy:$Force.IsPresent) {
+      $filesChanged = $true
+    }
+  }
+  foreach ($schemaFile in Get-ChildItem -LiteralPath $sourceSchemaDir -File -Filter '*.json') {
+    $targetFile = Join-Path $codexSchemaDir $schemaFile.Name
+    if (Copy-FileIfNeeded -SourcePath $schemaFile.FullName -TargetPath $targetFile -ForceCopy:$Force.IsPresent) {
+      $filesChanged = $true
     }
   }
 
@@ -121,11 +188,16 @@ try {
   }
 
   $effectiveDefaultCwd = Resolve-EffectiveDefaultCwd -Configured $DefaultCwd
+  $commandLocale = if ([string]::IsNullOrWhiteSpace($Locale)) { 'auto' } else { $Locale }
+  $commandLegalProfile = if ([string]::IsNullOrWhiteSpace($LegalProfile)) { 'global-minimal' } else { $LegalProfile }
+
   $merge = Merge-CodexNotifierStopHook `
     -ConfigText $configText `
     -StopHookScriptPath $targetStopHookPath `
     -DefaultCwd $effectiveDefaultCwd `
-    -TimeoutMs 4000
+    -TimeoutMs 4000 `
+    -Locale $commandLocale `
+    -LegalProfile $commandLegalProfile
 
   if ([bool]$merge.conflict) {
     Emit-ResultAndExit -Result @{
@@ -133,6 +205,9 @@ try {
       config_backup_path = $backupPath
       installed_hook_paths = $installedHookPaths
       effective_default_cwd = $effectiveDefaultCwd
+      locale_effective = $effectiveLocale
+      dir_effective = $effectiveDir
+      legal_profile = $effectiveLegalProfile
     } -ExitCode 20
   }
 
@@ -142,14 +217,22 @@ try {
   }
 
   if (-not $NoSmokeTest.IsPresent) {
-    $smokeExit = Invoke-StopHookSmokeTest -StopHookPath $targetStopHookPath -EffectiveDefaultCwd $effectiveDefaultCwd
+    $smokeExit = Invoke-StopHookSmokeTest `
+      -StopHookPath $targetStopHookPath `
+      -EffectiveDefaultCwd $effectiveDefaultCwd `
+      -LocaleEffective $effectiveLocale `
+      -DirEffective $effectiveDir `
+      -LegalProfileEffective $effectiveLegalProfile
     if ($smokeExit -ne 0) {
       Emit-ResultAndExit -Result @{
         status = 'failed'
         config_backup_path = $backupPath
         installed_hook_paths = $installedHookPaths
         effective_default_cwd = $effectiveDefaultCwd
-        error = 'smoke_test_failed'
+        locale_effective = $effectiveLocale
+        dir_effective = $effectiveDir
+        legal_profile = $effectiveLegalProfile
+        error = (Get-I18nText -Key 'installer.error_smoke_failed' -Locale $effectiveLocale)
       } -ExitCode 1
     }
   }
@@ -160,6 +243,9 @@ try {
     config_backup_path = $backupPath
     installed_hook_paths = $installedHookPaths
     effective_default_cwd = $effectiveDefaultCwd
+    locale_effective = $effectiveLocale
+    dir_effective = $effectiveDir
+    legal_profile = $effectiveLegalProfile
   } -ExitCode 0
 } catch {
   Emit-ResultAndExit -Result @{
@@ -167,6 +253,9 @@ try {
     config_backup_path = $null
     installed_hook_paths = @()
     effective_default_cwd = $null
+    locale_effective = $null
+    dir_effective = $null
+    legal_profile = $null
     error = $_.Exception.Message
   } -ExitCode 1
 }

@@ -7,6 +7,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. (Join-Path $PSScriptRoot 'lib\locale-resolver.ps1')
+. (Join-Path $PSScriptRoot 'lib\layout-direction.ps1')
+
 function Write-Utf8NoBomFile {
   param(
     [Parameter(Mandatory = $true)][string]$Path,
@@ -29,6 +32,13 @@ function Emit-ResultAndExit {
 }
 
 try {
+  $localeInfo = Resolve-NotifierLocale -Locale 'auto'
+  $dirInfo = Resolve-NotifierDirection -Dir 'auto' -Locale $localeInfo.locale
+  $legalInfo = Resolve-NotifierLegalProfile -LegalProfile ''
+  $effectiveLocale = [string]$localeInfo.locale
+  $effectiveDir = [string]$dirInfo.dir_effective
+  $effectiveLegalProfile = [string]$legalInfo.legal_profile
+
   $hooksDir = Join-Path $CodexHome 'hooks'
   $backupDir = Join-Path $CodexHome 'backup'
   if (-not (Test-Path -LiteralPath $backupDir)) {
@@ -56,12 +66,25 @@ try {
   $removedFiles = @()
   $targetFiles = @(
     (Join-Path $hooksDir 'notify-stop.ps1'),
-    (Join-Path $hooksDir 'notify-click-jump.ps1')
+    (Join-Path $hooksDir 'notify-click-jump.ps1'),
+    (Join-Path $hooksDir 'lib\i18n-core.ps1'),
+    (Join-Path $hooksDir 'lib\icu-message.ps1'),
+    (Join-Path $hooksDir 'lib\locale-resolver.ps1'),
+    (Join-Path $hooksDir 'lib\layout-direction.ps1'),
+    (Join-Path $hooksDir 'lib\format-cldr.ps1')
   )
   foreach ($file in $targetFiles) {
     if (Test-Path -LiteralPath $file) {
       Remove-Item -LiteralPath $file -Force
       $removedFiles += $file
+    }
+  }
+
+  foreach ($dir in @((Join-Path $hooksDir 'lib'), (Join-Path $CodexHome 'i18n\locales'), (Join-Path $CodexHome 'i18n\schema'))) {
+    if (Test-Path -LiteralPath $dir) {
+      if ((Get-ChildItem -LiteralPath $dir -Force -ErrorAction SilentlyContinue | Measure-Object).Count -eq 0) {
+        Remove-Item -LiteralPath $dir -Force -ErrorAction SilentlyContinue
+      }
     }
   }
 
@@ -78,6 +101,9 @@ try {
     config_backup_path = $backupPath
     removed_files = $removedFiles
     managed_block_removed = $configChanged
+    locale_effective = $effectiveLocale
+    dir_effective = $effectiveDir
+    legal_profile = $effectiveLegalProfile
   } -ExitCode 0
 } catch {
   Emit-ResultAndExit -Result @{
@@ -86,6 +112,9 @@ try {
     config_backup_path = $null
     removed_files = @()
     managed_block_removed = $false
+    locale_effective = $null
+    dir_effective = $null
+    legal_profile = $null
     error = $_.Exception.Message
   } -ExitCode 1
 }

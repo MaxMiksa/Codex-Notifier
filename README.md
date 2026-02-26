@@ -1,7 +1,7 @@
 <h1 align="center">Codex-Notifier</h1>
 
 <p align="center">
-  <a href="#"><img alt="Version" src="https://img.shields.io/badge/version-v0.1.0-blue.svg" /></a>
+  <a href="#"><img alt="Version" src="https://img.shields.io/badge/version-v0.2.0-blue.svg" /></a>
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-extension-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
   &nbsp;&nbsp;
@@ -29,6 +29,14 @@ It keeps your existing Codex flow intact while adding predictable notifications 
 | **🖱 Click-to-Jump VSCode** | Clicking the balloon focuses the matching VSCode workspace window first; falls back to `code -r <cwd>`. |
 | **🧩 Safe Config Merge** | Installer merges `~/.codex/config.toml` with managed markers and conflict detection (`exit 20`). |
 | **🧪 Operational Scripts** | Includes `install`, `doctor`, and `uninstall` scripts for setup, validation, and rollback. |
+| **🌐 i18n/l10n Scaffold** | Supports `en-US` + `zh-CN`, CLDR formatting, ICU plural templates, and pseudo RTL (`ar-XB`) validation. |
+
+## Compliance (Global Minimal)
+
+- Privacy notice: notifications are generated from local runtime events.
+- Local processing: payload parsing and window matching run on-device.
+- No upload: Codex-Notifier does not forward payload content to external services.
+- Audit log: operational metadata is stored in local JSONL logs.
 
 ## Usage (Happy Path)
 
@@ -51,7 +59,7 @@ codex exec "say hi"
 
 - Windows + PowerShell (`pwsh.exe`) required.
 - Codex CLI and VSCode are expected to be installed.
-- v0.1.0 targets Windows only.
+- v0.2.0 targets Windows only.
 - Balloon click callback works within the active notification window, not guaranteed from historical Action Center entries.
 
 </details>
@@ -62,6 +70,10 @@ codex exec "say hi"
 - Install to real Codex home:
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexHome "$HOME\.codex"
+```
+- Force locale/legal profile:
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Locale "en-US" -LegalProfile "global-minimal"
 ```
 - Validate installation:
 ```powershell

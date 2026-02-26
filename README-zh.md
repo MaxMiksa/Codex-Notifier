@@ -1,7 +1,7 @@
 <h1 align="center">Codex-Notifier</h1>
 
 <p align="center">
-  <a href="#"><img alt="版本" src="https://img.shields.io/badge/版本-v0.1.0-blue.svg" /></a>
+  <a href="#"><img alt="版本" src="https://img.shields.io/badge/版本-v0.2.0-blue.svg" /></a>
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-扩展-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/badge/许可证-MIT-green.svg" /></a>
   &nbsp;&nbsp;
@@ -29,6 +29,14 @@ Codex-Notifier 用于把 Codex 的任务完成状态稳定地变成桌面反馈�
 | **🖱 点击跳转 VSCode** | 点击气泡优先激活匹配工作区窗口，失败时回退 `code -r <cwd>`。 |
 | **🧩 安全配置合并** | 安装器以受管标记合并 `~/.codex/config.toml`，冲突时返回 `exit 20`。 |
 | **🧪 运维脚本齐全** | 提供 `install`、`doctor`、`uninstall` 三件套，覆盖安装、校验与回滚。 |
+| **🌐 i18n/l10n 脚手架** | 支持 `en-US` + `zh-CN`、CLDR 格式化、ICU 复数模板与伪 RTL（`ar-XB`）验证。 |
+
+## 合规说明（Global Minimal）
+
+- 隐私说明：通知仅基于本地运行事件生成。  
+- 本地处理：payload 解析与窗口匹配均在设备本地完成。  
+- 不上传数据：Codex-Notifier 不会向外部服务转发 payload 内容。  
+- 审计日志：运行元数据记录在本地 JSONL 日志中。  
 
 ## 使用方式（推荐路径）
 
@@ -51,7 +59,7 @@ codex exec "say hi"
 
 - 需要 Windows + PowerShell (`pwsh.exe`)。
 - 默认假设已安装 Codex CLI 与 VSCode。
-- v0.1.0 当前仅支持 Windows。
+- v0.2.0 当前仅支持 Windows。
 - 气泡点击回调仅保证在通知展示窗口内有效，系统通知中心历史项不保证可回调。
 
 </details>
@@ -62,6 +70,10 @@ codex exec "say hi"
 - 安装到真实 Codex 主目录：
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexHome "$HOME\.codex"
+```
+- 指定语言与合规档：
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Locale "zh-CN" -LegalProfile "global-minimal"
 ```
 - 安装后自检：
 ```powershell

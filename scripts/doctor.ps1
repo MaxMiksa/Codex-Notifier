@@ -2,11 +2,17 @@
 param(
   [string]$CodexHome = (Join-Path $HOME '.codex'),
   [string]$DefaultCwd = '',
+  [string]$Locale = 'auto',
+  [string]$LegalProfile = 'global-minimal',
   [switch]$RunSmokeTest
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+. (Join-Path $PSScriptRoot 'lib\locale-resolver.ps1')
+. (Join-Path $PSScriptRoot 'lib\layout-direction.ps1')
+. (Join-Path $PSScriptRoot 'lib\i18n-core.ps1')
 
 function Resolve-EffectiveDefaultCwd {
   param([string]$Configured)
@@ -29,11 +35,14 @@ function Resolve-EffectiveDefaultCwd {
 function Invoke-StopHookSmokeTest {
   param(
     [Parameter(Mandatory = $true)][string]$StopHookPath,
-    [Parameter(Mandatory = $true)][string]$EffectiveDefaultCwd
+    [Parameter(Mandatory = $true)][string]$EffectiveDefaultCwd,
+    [Parameter(Mandatory = $true)][string]$LocaleEffective,
+    [Parameter(Mandatory = $true)][string]$DirEffective,
+    [Parameter(Mandatory = $true)][string]$LegalProfileEffective
   )
 
   $payload = '{"type":"smoketest","event":"smoketest","thread-id":"doctor-smoketest","turn-id":"doctor-smoketest"}'
-  $payload | & pwsh.exe -NoProfile -ExecutionPolicy Bypass -File $StopHookPath -DefaultCwd $EffectiveDefaultCwd
+  $payload | & pwsh.exe -NoProfile -ExecutionPolicy Bypass -File $StopHookPath -DefaultCwd $EffectiveDefaultCwd -Locale $LocaleEffective -Dir $DirEffective -LegalProfile $LegalProfileEffective
   return $LASTEXITCODE
 }
 
@@ -49,17 +58,26 @@ function Emit-ResultAndExit {
 }
 
 try {
+  $localeInfo = Resolve-NotifierLocale -Locale $Locale
+  $dirInfo = Resolve-NotifierDirection -Dir 'auto' -Locale $localeInfo.locale
+  $legalInfo = Resolve-NotifierLegalProfile -LegalProfile $LegalProfile
+  $effectiveLocale = [string]$localeInfo.locale
+  $effectiveDir = [string]$dirInfo.dir_effective
+  $effectiveLegalProfile = [string]$legalInfo.legal_profile
+
   $effectiveDefaultCwd = Resolve-EffectiveDefaultCwd -Configured $DefaultCwd
   $hooksDir = Join-Path $CodexHome 'hooks'
   $logsPath = Join-Path $hooksDir 'logs\notify-stop-events.jsonl'
   $stopHookPath = Join-Path $hooksDir 'notify-stop.ps1'
   $clickHookPath = Join-Path $hooksDir 'notify-click-jump.ps1'
   $configPath = Join-Path $CodexHome 'config.toml'
+  $localeDir = Join-Path $CodexHome 'i18n\locales'
 
   $checks = [ordered]@{
     stop_hook_exists = (Test-Path -LiteralPath $stopHookPath)
     click_hook_exists = (Test-Path -LiteralPath $clickHookPath)
     config_exists = (Test-Path -LiteralPath $configPath)
+    locale_dir_exists = (Test-Path -LiteralPath $localeDir)
     managed_block_present = $false
     stop_entry_present = $false
     log_path_exists = (Test-Path -LiteralPath $logsPath)
@@ -76,17 +94,30 @@ try {
   }
 
   if ($RunSmokeTest.IsPresent -and $checks.stop_hook_exists) {
-    $checks.smoke_test_ok = ((Invoke-StopHookSmokeTest -StopHookPath $stopHookPath -EffectiveDefaultCwd $effectiveDefaultCwd) -eq 0)
+    $checks.smoke_test_ok = ((Invoke-StopHookSmokeTest `
+          -StopHookPath $stopHookPath `
+          -EffectiveDefaultCwd $effectiveDefaultCwd `
+          -LocaleEffective $effectiveLocale `
+          -DirEffective $effectiveDir `
+          -LegalProfileEffective $effectiveLegalProfile) -eq 0)
   }
 
   $failed = @()
-  foreach ($item in @('stop_hook_exists', 'click_hook_exists', 'config_exists', 'managed_block_present', 'stop_entry_present')) {
+  foreach ($item in @('stop_hook_exists', 'click_hook_exists', 'config_exists', 'managed_block_present', 'stop_entry_present', 'locale_dir_exists')) {
     if (-not [bool]$checks[$item]) {
       $failed += $item
     }
   }
   if ($RunSmokeTest.IsPresent -and -not [bool]$checks.smoke_test_ok) {
     $failed += 'smoke_test_ok'
+  }
+
+  $notices = Get-I18nLegalNotices -Locale $effectiveLocale
+  $complianceSummary = Get-I18nText -Key 'doctor.compliance_summary' -Locale $effectiveLocale -ArgsObject @{
+    privacy = $notices.privacy
+    localProcessing = $notices.localProcessing
+    noUpload = $notices.noUpload
+    audit = $notices.audit
   }
 
   $status = if ($failed.Count -eq 0) { 'ok' } else { 'failed' }
@@ -98,6 +129,10 @@ try {
     log_path = $logsPath
     checks = $checks
     failed_checks = $failed
+    locale_effective = $effectiveLocale
+    dir_effective = $effectiveDir
+    legal_profile = $effectiveLegalProfile
+    compliance_summary = $complianceSummary
   } -ExitCode ($(if ($status -eq 'ok') { 0 } else { 1 }))
 } catch {
   Emit-ResultAndExit -Result @{
@@ -108,6 +143,10 @@ try {
     log_path = $null
     checks = @{}
     failed_checks = @('unexpected_error')
+    locale_effective = $null
+    dir_effective = $null
+    legal_profile = $null
+    compliance_summary = $null
     error = $_.Exception.Message
   } -ExitCode 1
 }

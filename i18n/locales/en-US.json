@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "locale": "en-US",
+    "dir": "ltr",
+    "supported_legal_profiles": ["global-minimal"]
+  },
+  "notifications": {
+    "title_task_complete": "Codex has completed the current task",
+    "time_completed": "Completed at {time}",
+    "fallback_success": "This turn is complete and a response is ready.",
+    "fallback_stop": "The task has ended.",
+    "fallback_unknown": "Task status has been updated.",
+    "body_template": "{status} {summary}  {timeLine}",
+    "summary_trim_prefixes": ["summary:", "Summary:", "abstract:", "Abstract:"],
+    "status_success": "✅",
+    "status_failure": "❌"
+  },
+  "legal": {
+    "privacy_notice": "Privacy notice: notifications are generated from local runtime events.",
+    "local_processing_notice": "Local processing: all parsing and matching run on-device.",
+    "no_upload_notice": "No upload: task payloads are not sent to external services by Codex-Notifier.",
+    "audit_log_notice": "Audit log: operational metadata is written to local JSONL logs."
+  },
+  "installer": {
+    "error_missing_hooks": "Missing hook scripts in repository. Expected hooks/notify-stop.ps1 and hooks/notify-click-jump.ps1.",
+    "error_smoke_failed": "Smoke test failed."
+  },
+  "doctor": {
+    "status_ok": "All checks passed.",
+    "status_failed": "One or more checks failed.",
+    "compliance_summary": "{privacy} {localProcessing} {noUpload} {audit}"
+  },
+  "uninstall": {
+    "status_uninstalled": "Managed artifacts were removed.",
+    "status_not_installed": "No managed artifacts were found."
+  },
+  "icu": {
+    "items_template": "{count, plural, =0 {No items} one {# item} other {# items}}"
+  }
+}

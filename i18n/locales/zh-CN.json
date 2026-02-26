@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "dir": "ltr",
+    "supported_legal_profiles": ["global-minimal"]
+  },
+  "notifications": {
+    "title_task_complete": "Codex 已完成当前任务",
+    "time_completed": "完成时间 {time}",
+    "fallback_success": "已完成本轮任务，结果已返回。",
+    "fallback_stop": "任务已结束。",
+    "fallback_unknown": "任务状态已更新。",
+    "body_template": "{status} {summary}  {timeLine}",
+    "summary_trim_prefixes": ["总结:", "总结：", "摘要:", "摘要：", "summary:", "Summary:"],
+    "status_success": "✅",
+    "status_failure": "❌"
+  },
+  "legal": {
+    "privacy_notice": "隐私说明：通知仅基于本地运行事件生成。",
+    "local_processing_notice": "本地处理：解析与匹配逻辑均在设备本地执行。",
+    "no_upload_notice": "不上传数据：Codex-Notifier 不会将任务负载发送到外部服务。",
+    "audit_log_notice": "审计日志：运行元数据会写入本地 JSONL 日志。"
+  },
+  "installer": {
+    "error_missing_hooks": "仓库中缺少 Hook 脚本，需存在 hooks/notify-stop.ps1 与 hooks/notify-click-jump.ps1。",
+    "error_smoke_failed": "冒烟测试失败。"
+  },
+  "doctor": {
+    "status_ok": "所有检查均通过。",
+    "status_failed": "存在未通过的检查项。",
+    "compliance_summary": "{privacy} {localProcessing} {noUpload} {audit}"
+  },
+  "uninstall": {
+    "status_uninstalled": "已移除受管资产。",
+    "status_not_installed": "未发现受管资产。"
+  },
+  "icu": {
+    "items_template": "{count, plural, =0 {无项目} one {# 个项目} other {# 个项目}}"
+  }
+}

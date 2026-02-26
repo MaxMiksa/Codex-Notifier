@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "locale": "ar-XB",
+    "dir": "rtl",
+    "supported_legal_profiles": ["global-minimal"]
+  },
+  "notifications": {
+    "title_task_complete": "⟪RTL⟫ Codex completed the current task",
+    "time_completed": "⟪RTL⟫ Completed at {time}",
+    "fallback_success": "⟪RTL⟫ This turn is complete and response is ready.",
+    "fallback_stop": "⟪RTL⟫ The task has ended.",
+    "fallback_unknown": "⟪RTL⟫ Task status has been updated.",
+    "body_template": "{status} {summary}  {timeLine}",
+    "summary_trim_prefixes": ["summary:", "Summary:"],
+    "status_success": "✅",
+    "status_failure": "❌"
+  },
+  "legal": {
+    "privacy_notice": "⟪RTL⟫ Privacy notice: local runtime events only.",
+    "local_processing_notice": "⟪RTL⟫ Local processing: parsing runs on-device.",
+    "no_upload_notice": "⟪RTL⟫ No upload: no external payload forwarding.",
+    "audit_log_notice": "⟪RTL⟫ Audit log: metadata is stored locally."
+  },
+  "installer": {
+    "error_missing_hooks": "⟪RTL⟫ Missing hook scripts in repository.",
+    "error_smoke_failed": "⟪RTL⟫ Smoke test failed."
+  },
+  "doctor": {
+    "status_ok": "⟪RTL⟫ All checks passed.",
+    "status_failed": "⟪RTL⟫ Some checks failed.",
+    "compliance_summary": "{privacy} {localProcessing} {noUpload} {audit}"
+  },
+  "uninstall": {
+    "status_uninstalled": "⟪RTL⟫ Managed artifacts removed.",
+    "status_not_installed": "⟪RTL⟫ No managed artifacts found."
+  },
+  "icu": {
+    "items_template": "{count, plural, =0 {No items} one {# item} two {# items} few {# items} many {# items} other {# items}}"
+  }
+}

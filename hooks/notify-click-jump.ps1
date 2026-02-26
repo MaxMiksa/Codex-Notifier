@@ -23,27 +23,58 @@ param(
   [string]$NotifyReason = '',
   [string]$IsSuccess = 'true',
   [string]$NotifyDurationMs = '2500',
-  [string]$ClickWaitMs = '8000'
+  [string]$ClickWaitMs = '8000',
+  [string]$Locale = 'auto',
+  [string]$Dir = 'auto',
+  [string]$LegalProfile = 'global-minimal',
+  [string]$I18nFallbackUsed = 'false',
+  [string]$MessageKey = ''
 )
 
 $ErrorActionPreference = 'Stop'
 
-function Resolve-NotifierDefaultCwd {
-  param([string]$Configured)
+function Resolve-NotifierLibPath {
+  param([Parameter(Mandatory = $true)][string]$FileName)
 
-  if (-not [string]::IsNullOrWhiteSpace($Configured) -and (Test-Path -LiteralPath $Configured)) {
-    return $Configured
+  $candidates = @(
+    (Join-Path $PSScriptRoot ("lib\{0}" -f $FileName)),
+    (Join-Path (Split-Path -Parent $PSScriptRoot) ("scripts\lib\{0}" -f $FileName))
+  )
+  foreach ($path in $candidates) {
+    if (Test-Path -LiteralPath $path) {
+      return $path
+    }
   }
+  return $null
+}
 
-  $desktopPath = Join-Path $HOME 'Desktop'
-  $defaultPath = Join-Path $desktopPath 'default'
-  if (Test-Path -LiteralPath $defaultPath) {
-    return $defaultPath
+foreach ($libName in @('locale-resolver.ps1', 'layout-direction.ps1')) {
+  $libPath = Resolve-NotifierLibPath -FileName $libName
+  if (-not [string]::IsNullOrWhiteSpace($libPath)) {
+    . $libPath
   }
-  if (Test-Path -LiteralPath $desktopPath) {
-    return $desktopPath
+}
+
+if (-not (Get-Command -Name Resolve-NotifierLocale -ErrorAction SilentlyContinue)) {
+  function Resolve-NotifierLocale {
+    param([string]$Locale = '', [string]$FallbackLocale = 'en-US')
+    $effective = if ([string]::IsNullOrWhiteSpace($Locale) -or $Locale -eq 'auto') { $FallbackLocale } else { $Locale }
+    return [pscustomobject]@{ locale = $effective; source = 'fallback'; fallback_used = $true }
   }
-  return $HOME
+}
+if (-not (Get-Command -Name Resolve-NotifierDirection -ErrorAction SilentlyContinue)) {
+  function Resolve-NotifierDirection {
+    param([string]$Dir = 'auto', [string]$Locale = 'en-US')
+    $effective = if ($Dir -eq 'ltr' -or $Dir -eq 'rtl') { $Dir } elseif ($Locale -like 'ar*') { 'rtl' } else { 'ltr' }
+    return [pscustomobject]@{ dir_effective = $effective; source = 'fallback'; is_rtl = ($effective -eq 'rtl') }
+  }
+}
+if (-not (Get-Command -Name Resolve-NotifierLegalProfile -ErrorAction SilentlyContinue)) {
+  function Resolve-NotifierLegalProfile {
+    param([string]$LegalProfile = '')
+    $effective = if ([string]::IsNullOrWhiteSpace($LegalProfile)) { 'global-minimal' } else { $LegalProfile }
+    return [pscustomobject]@{ legal_profile = $effective; source = 'fallback' }
+  }
 }
 
 function Get-ContextString {
@@ -85,6 +116,24 @@ function Convert-ToInt {
     return $number
   }
   return $Default
+}
+
+function Resolve-NotifierDefaultCwd {
+  param([string]$Configured)
+
+  if (-not [string]::IsNullOrWhiteSpace($Configured) -and (Test-Path -LiteralPath $Configured)) {
+    return $Configured
+  }
+
+  $desktopPath = Join-Path $HOME 'Desktop'
+  $defaultPath = Join-Path $desktopPath 'default'
+  if (Test-Path -LiteralPath $defaultPath) {
+    return $defaultPath
+  }
+  if (Test-Path -LiteralPath $desktopPath) {
+    return $desktopPath
+  }
+  return $HOME
 }
 
 function Truncate-ErrorMessage {
@@ -247,7 +296,7 @@ function Get-TopCodeWindowAny {
 function Try-ActivateWindow {
   param([IntPtr]$Handle)
   try {
-    [void][CodexWindowApi]::ShowWindowAsync($Handle, 9) # SW_RESTORE
+    [void][CodexWindowApi]::ShowWindowAsync($Handle, 9)
     Start-Sleep -Milliseconds 80
     return [CodexWindowApi]::SetForegroundWindow($Handle)
   } catch {
@@ -307,6 +356,11 @@ try {
       $IsSuccess = [string](Get-ContextRaw -Context $ctx -Name 'is_success')
       $NotifyDurationMs = [string](Get-ContextRaw -Context $ctx -Name 'notify_duration_ms')
       $ClickWaitMs = [string](Get-ContextRaw -Context $ctx -Name 'click_wait_ms')
+      $Locale = Get-ContextString -Context $ctx -Name 'locale' -Default $Locale
+      $Dir = Get-ContextString -Context $ctx -Name 'dir' -Default $Dir
+      $LegalProfile = Get-ContextString -Context $ctx -Name 'legal_profile' -Default $LegalProfile
+      $I18nFallbackUsed = [string](Get-ContextRaw -Context $ctx -Name 'i18n_fallback_used')
+      $MessageKey = Get-ContextString -Context $ctx -Name 'message_key' -Default $MessageKey
     }
   }
 
@@ -317,6 +371,14 @@ try {
   $isSuccessBool = Convert-ToBool $IsSuccess
   $notifyDuration = Convert-ToInt $NotifyDurationMs 2500
   $clickWait = Convert-ToInt $ClickWaitMs 8000
+  $i18nFallbackUsedBool = Convert-ToBool $I18nFallbackUsed
+
+  $localeInfo = Resolve-NotifierLocale -Locale $Locale
+  $dirInfo = Resolve-NotifierDirection -Dir $Dir -Locale $localeInfo.locale
+  $legalInfo = Resolve-NotifierLegalProfile -LegalProfile $LegalProfile
+  $effectiveLocale = [string]$localeInfo.locale
+  $effectiveDir = [string]$dirInfo.dir_effective
+  $effectiveLegalProfile = [string]$legalInfo.legal_profile
 
   $DefaultCwd = Resolve-NotifierDefaultCwd -Configured $DefaultCwd
   $targetCwd = Resolve-TargetCwd -Candidate $Cwd -Fallback $DefaultCwd
@@ -377,7 +439,6 @@ try {
       Start-Sleep -Milliseconds 50
     }
     if (-not $script:balloonShown) {
-      # Retry once when the first balloon is swallowed by shell timing.
       Start-Sleep -Milliseconds 120
       $showAttempts = 2
       $notifyIcon.ShowBalloonTip($notifyDuration)
@@ -445,10 +506,8 @@ try {
           if ($activated) {
             $jumpResult = 'ok'
             $jumpError = $null
-          } else {
-            if ([string]::IsNullOrWhiteSpace($fallbackReason)) {
-              $fallbackReason = 'window_title_activate_failed'
-            }
+          } elseif ([string]::IsNullOrWhiteSpace($fallbackReason)) {
+            $fallbackReason = 'window_title_activate_failed'
           }
         } elseif ([string]::IsNullOrWhiteSpace($fallbackReason)) {
           $fallbackReason = 'window_title_not_found'
@@ -469,10 +528,8 @@ try {
           if ($activated) {
             $jumpResult = 'ok'
             $jumpError = $null
-          } else {
-            if ([string]::IsNullOrWhiteSpace($fallbackReason)) {
-              $fallbackReason = 'window_any_activate_failed'
-            }
+          } elseif ([string]::IsNullOrWhiteSpace($fallbackReason)) {
+            $fallbackReason = 'window_any_activate_failed'
           }
         } elseif ([string]::IsNullOrWhiteSpace($fallbackReason)) {
           $fallbackReason = 'window_any_not_found'
@@ -507,45 +564,48 @@ try {
       New-Item -ItemType Directory -Path $logDir -Force | Out-Null
     }
     $logPath = Join-Path $logDir 'notify-stop-events.jsonl'
-    if (Test-Path -LiteralPath $logPath) {
-      $record = [ordered]@{
-        schema_version = 2
-        ts_iso = [DateTimeOffset]::Now.ToString('o')
-        source = $InputSource
-        parse_ok = [bool]$parseOkBool
-        payload_len = [int]$payloadLenInt
-        event_type = $EventType
-        event_name = $EventName
-        thread_id = $ThreadId
-        turn_id = $TurnId
-        raw_preview = $RawPreview
-        payload_keys = $PayloadKeys
-        summary_mode = $SummaryMode
-        summary_text = $SummaryText
-        decision_mode = $DecisionMode
-        hard_marker_found = [bool]$hardMarkerFoundBool
-        hard_marker_key = $HardMarkerKey
-        hard_marker_value = if ([string]::IsNullOrWhiteSpace($HardMarkerValue)) { $null } else { $HardMarkerValue }
-        notify_sent = [bool]$notifySentBool
-        notify_reason = $NotifyReason
-        click_enabled = [bool]$clickEnabled
-        click_received = [bool]$clickReceived
-        balloon_shown = [bool]$balloonShown
-        show_attempts = [int]$showAttempts
-        jump_strategy = $jumpStrategy
-        jump_target_cwd = $targetCwd
-        jump_workspace_token = $workspaceToken
-        jump_window_title = $jumpWindowTitle
-        jump_window_pid = $jumpWindowPid
-        jump_result = $jumpResult
-        jump_error = Truncate-ErrorMessage $jumpError
-      }
-      $line = $record | ConvertTo-Json -Compress
-      Add-Content -LiteralPath $logPath -Value $line -Encoding utf8
+    $record = [ordered]@{
+      schema_version = 3
+      ts_iso = [DateTimeOffset]::Now.ToString('o')
+      source = $InputSource
+      parse_ok = [bool]$parseOkBool
+      payload_len = [int]$payloadLenInt
+      event_type = $EventType
+      event_name = $EventName
+      thread_id = $ThreadId
+      turn_id = $TurnId
+      raw_preview = $RawPreview
+      payload_keys = $PayloadKeys
+      summary_mode = $SummaryMode
+      summary_text = $SummaryText
+      decision_mode = $DecisionMode
+      hard_marker_found = [bool]$hardMarkerFoundBool
+      hard_marker_key = $HardMarkerKey
+      hard_marker_value = if ([string]::IsNullOrWhiteSpace($HardMarkerValue)) { $null } else { $HardMarkerValue }
+      notify_sent = [bool]$notifySentBool
+      notify_reason = $NotifyReason
+      click_enabled = [bool]$clickEnabled
+      click_received = [bool]$clickReceived
+      balloon_shown = [bool]$balloonShown
+      show_attempts = [int]$showAttempts
+      jump_strategy = $jumpStrategy
+      jump_target_cwd = $targetCwd
+      jump_workspace_token = $workspaceToken
+      jump_window_title = $jumpWindowTitle
+      jump_window_pid = $jumpWindowPid
+      jump_result = $jumpResult
+      jump_error = Truncate-ErrorMessage $jumpError
+      locale = $effectiveLocale
+      dir = $effectiveDir
+      legal_profile = $effectiveLegalProfile
+      i18n_fallback_used = [bool]$i18nFallbackUsedBool
+      message_key = $MessageKey
     }
+    $line = $record | ConvertTo-Json -Compress
+    Add-Content -LiteralPath $logPath -Value $line -Encoding utf8
   } catch {}
 } catch {
-  # swallow all errors to avoid impacting Codex flow
+  # Swallow all errors to avoid impacting Codex flow.
 } finally {
   exit 0
 }

@@ -1,0 +1,11 @@
+# Paste this block under [hooks] in ~/.codex/config.toml when install.ps1 returns code 20.
+# Keep your existing hooks and append this managed Stop entry.
+
+# codex-notifier managed block start
+Stop = [
+  { hooks = [
+      { type = "command", command = ["pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:\\Users\\<YOU>\\.codex\\hooks\\notify-stop.ps1", "-DefaultCwd", "C:\\Users\\<YOU>\\Desktop\\default"], timeout_ms = 4000 }
+    ]
+  }
+]
+# codex-notifier managed block end

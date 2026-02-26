@@ -13,3 +13,12 @@ Files/CHANGELOG.md
 Files/CHANGELOG-zh.md
 AI_RELEASE_RULES.md
 CHECKLIST.md
+
+# Local/internal docs not published to remote
+AGENTS.md
+CHAT_LOGS.md
+PROJECT.md
+PLAN_*.md
+CHANGELOG.md
+CHANGELOG-zh.md
+RELEASE_NOTES.md

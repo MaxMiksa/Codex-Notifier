@@ -189,6 +189,7 @@ try {
 
   $effectiveDefaultCwd = Resolve-EffectiveDefaultCwd -Configured $DefaultCwd
   $commandLocale = if ([string]::IsNullOrWhiteSpace($Locale)) { 'auto' } else { $Locale }
+  $commandDir = 'auto'
   $commandLegalProfile = if ([string]::IsNullOrWhiteSpace($LegalProfile)) { 'global-minimal' } else { $LegalProfile }
 
   $merge = Merge-CodexNotifierStopHook `
@@ -197,6 +198,7 @@ try {
     -DefaultCwd $effectiveDefaultCwd `
     -TimeoutMs 4000 `
     -Locale $commandLocale `
+    -Dir $commandDir `
     -LegalProfile $commandLegalProfile
 
   if ([bool]$merge.conflict) {

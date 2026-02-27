@@ -14,19 +14,21 @@ function Get-ManagedStopHookBlock {
     [Parameter(Mandatory = $true)][string]$DefaultCwd,
     [int]$TimeoutMs = 4000,
     [string]$Locale = 'auto',
+    [string]$Dir = 'auto',
     [string]$LegalProfile = 'global-minimal'
   )
 
   $stopHookPathToml = ConvertTo-TomlBasicString -Value $StopHookScriptPath
   $defaultCwdToml = ConvertTo-TomlBasicString -Value $DefaultCwd
   $localeToml = ConvertTo-TomlBasicString -Value $Locale
+  $dirToml = ConvertTo-TomlBasicString -Value $Dir
   $legalProfileToml = ConvertTo-TomlBasicString -Value $LegalProfile
 
   return @"
 # codex-notifier managed block start
 Stop = [
   { hooks = [
-      { type = "command", command = ["pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $stopHookPathToml, "-DefaultCwd", $defaultCwdToml, "-Locale", $localeToml, "-LegalProfile", $legalProfileToml], timeout_ms = $TimeoutMs }
+      { type = "command", command = ["pwsh.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $stopHookPathToml, "-DefaultCwd", $defaultCwdToml, "-Locale", $localeToml, "-Dir", $dirToml, "-LegalProfile", $legalProfileToml], timeout_ms = $TimeoutMs }
     ]
   }
 ]
@@ -62,6 +64,7 @@ function Merge-CodexNotifierStopHook {
     [Parameter(Mandatory = $true)][string]$DefaultCwd,
     [int]$TimeoutMs = 4000,
     [string]$Locale = 'auto',
+    [string]$Dir = 'auto',
     [string]$LegalProfile = 'global-minimal'
   )
 
@@ -72,6 +75,7 @@ function Merge-CodexNotifierStopHook {
     -DefaultCwd $DefaultCwd `
     -TimeoutMs $TimeoutMs `
     -Locale $Locale `
+    -Dir $Dir `
     -LegalProfile $LegalProfile
   [string[]]$managedLines = $managedBlock.Split("`n")
   $lines = if ([string]::IsNullOrEmpty($normalized)) { @() } else { @($normalized.Split("`n")) }

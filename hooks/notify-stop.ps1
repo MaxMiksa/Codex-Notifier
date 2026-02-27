@@ -519,6 +519,16 @@ try {
 
   $raw = [Console]::In.ReadToEnd()
   $inputSource = 'stdin'
+  if ([string]::IsNullOrWhiteSpace($raw)) {
+    $boundPayloadCandidate = @($DefaultCwd, $Locale, $Dir, $LegalProfile) |
+      Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and $_ -match '^\s*[\{\[]' } |
+      Select-Object -First 1
+    if (-not [string]::IsNullOrWhiteSpace($boundPayloadCandidate)) {
+      # For notify argv mode, the appended JSON can bind to the first positional param.
+      $raw = $boundPayloadCandidate
+      $inputSource = 'bound_param'
+    }
+  }
   if ([string]::IsNullOrWhiteSpace($raw) -and $args.Count -gt 0) {
     $jsonLikeArg = $args | Where-Object { $_ -match '^\s*[\{\[]' } | Select-Object -First 1
     if (-not [string]::IsNullOrWhiteSpace($jsonLikeArg)) {
@@ -546,10 +556,49 @@ try {
   $payloadKeys = @()
   if ($parseOk -and $payloadObj -ne $null) {
     $payloadKeys = @($payloadObj.PSObject.Properties.Name | ForEach-Object { [string]$_ })
+    $hookEventObj = $null
+    if ($payloadObj.PSObject.Properties.Name -contains 'hook_event') {
+      $hookEventObj = $payloadObj.hook_event
+      if ($null -ne $hookEventObj) {
+        # Support the newer hook payload shape by normalizing fields we already consume.
+        if (-not ($payloadObj.PSObject.Properties.Name -contains 'last-assistant-message')) {
+          $hookAssistant = $hookEventObj.PSObject.Properties['last_assistant_message']
+          if ($null -ne $hookAssistant) {
+            Add-Member -InputObject $payloadObj -MemberType NoteProperty -Name 'last-assistant-message' -Value $hookAssistant.Value -Force
+          }
+        }
+        if (-not ($payloadObj.PSObject.Properties.Name -contains 'input-messages')) {
+          $hookInput = $hookEventObj.PSObject.Properties['input_messages']
+          if ($null -ne $hookInput) {
+            Add-Member -InputObject $payloadObj -MemberType NoteProperty -Name 'input-messages' -Value $hookInput.Value -Force
+          }
+        }
+      }
+    }
     if ($payloadObj.PSObject.Properties.Name -contains 'type') { $eventType = [string]$payloadObj.type }
     if ($payloadObj.PSObject.Properties.Name -contains 'event') { $eventName = [string]$payloadObj.event }
     if ($payloadObj.PSObject.Properties.Name -contains 'thread-id') { $threadId = [string]$payloadObj.'thread-id' }
     if ($payloadObj.PSObject.Properties.Name -contains 'turn-id') { $turnId = [string]$payloadObj.'turn-id' }
+    if ([string]::IsNullOrWhiteSpace($threadId) -and $payloadObj.PSObject.Properties.Name -contains 'thread_id') { $threadId = [string]$payloadObj.thread_id }
+    if ([string]::IsNullOrWhiteSpace($turnId) -and $payloadObj.PSObject.Properties.Name -contains 'turn_id') { $turnId = [string]$payloadObj.turn_id }
+    if ([string]::IsNullOrWhiteSpace($eventType) -and $null -ne $hookEventObj) {
+      $hookEventTypeProp = $hookEventObj.PSObject.Properties['event_type']
+      if ($null -ne $hookEventTypeProp) {
+        if ([string]$hookEventTypeProp.Value -eq 'after_agent') {
+          $eventType = 'agent-turn-complete'
+          if ([string]::IsNullOrWhiteSpace($threadId)) {
+            $hookThreadProp = $hookEventObj.PSObject.Properties['thread_id']
+            if ($null -ne $hookThreadProp) { $threadId = [string]$hookThreadProp.Value }
+          }
+          if ([string]::IsNullOrWhiteSpace($turnId)) {
+            $hookTurnProp = $hookEventObj.PSObject.Properties['turn_id']
+            if ($null -ne $hookTurnProp) { $turnId = [string]$hookTurnProp.Value }
+          }
+        } else {
+          $eventType = [string]$hookEventTypeProp.Value
+        }
+      }
+    }
 
     $parts = New-Object System.Collections.Generic.List[string]
     if ($eventType) { $parts.Add("type=$eventType") }

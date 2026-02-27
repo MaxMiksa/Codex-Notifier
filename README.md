@@ -1,7 +1,7 @@
 <h1 align="center">Codex-Notifier</h1>
 
 <p align="center">
-  <a href="#"><img alt="Version" src="https://img.shields.io/badge/version-v0.2.1-blue.svg" /></a>
+  <a href="#"><img alt="Version" src="https://img.shields.io/badge/version-v0.2.2-blue.svg" /></a>
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-extension-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
   &nbsp;&nbsp;
@@ -18,7 +18,7 @@ It keeps your existing Codex flow intact while adding predictable notifications 
 ## Visual Demo
 
 <p align="center">
-  <img src="Presentation/demo.gif" alt="Codex-Notifier demo" width="760" />
+  <img src="docs/demo/image.png" alt="Codex-Notifier demo" width="760" />
 </p>
 
 ## Features
@@ -59,7 +59,7 @@ codex exec "say hi"
 
 - Windows + PowerShell (`pwsh.exe`) required.
 - Codex CLI and VSCode are expected to be installed.
-- v0.2.0 targets Windows only.
+- v0.2.2 targets Windows only.
 - Balloon click callback works within the active notification window, not guaranteed from historical Action Center entries.
 
 </details>

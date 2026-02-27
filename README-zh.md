@@ -1,7 +1,7 @@
 <h1 align="center">Codex-Notifier</h1>
 
 <p align="center">
-  <a href="#"><img alt="版本" src="https://img.shields.io/badge/版本-v0.2.1-blue.svg" /></a>
+  <a href="#"><img alt="版本" src="https://img.shields.io/badge/版本-v0.2.2-blue.svg" /></a>
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-扩展-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/badge/许可证-MIT-green.svg" /></a>
   &nbsp;&nbsp;
@@ -18,7 +18,7 @@ Codex-Notifier 用于把 Codex 的任务完成状态稳定地变成桌面反馈�
 ## 可视化演示
 
 <p align="center">
-  <img src="Presentation/demo.gif" alt="Codex-Notifier 演示" width="760" />
+  <img src="docs/demo/image.png" alt="Codex-Notifier 演示" width="760" />
 </p>
 
 ## 功能特性
@@ -59,7 +59,7 @@ codex exec "say hi"
 
 - 需要 Windows + PowerShell (`pwsh.exe`)。
 - 默认假设已安装 Codex CLI 与 VSCode。
-- v0.2.0 当前仅支持 Windows。
+- v0.2.2 当前仅支持 Windows。
 - 气泡点击回调仅保证在通知展示窗口内有效，系统通知中心历史项不保证可回调。
 
 </details>

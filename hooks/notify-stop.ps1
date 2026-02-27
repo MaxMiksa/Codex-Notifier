@@ -197,6 +197,37 @@ function Get-MessageLikeText {
   return [string]$Value
 }
 
+function Normalize-SummaryForNotification {
+  param(
+    [string]$Text,
+    [string[]]$TrimPrefixes,
+    [int]$MaxElements = 72,
+    [string]$LocaleValue = 'en-US'
+  )
+
+  $normalized = Normalize-OneLine -Text $Text -TrimPrefixes $TrimPrefixes -MaxElements $MaxElements
+  if ([string]::IsNullOrWhiteSpace($normalized)) { return $null }
+  if ($normalized -notmatch '^\s*[\{\[]') { return $normalized }
+
+  try {
+    $obj = $normalized | ConvertFrom-Json -ErrorAction Stop
+    if ($obj -is [string]) {
+      $candidate = Normalize-OneLine -Text ([string]$obj) -TrimPrefixes $TrimPrefixes -MaxElements $MaxElements
+      if (-not [string]::IsNullOrWhiteSpace($candidate)) { return $candidate }
+    }
+
+    foreach ($key in @('title', 'summary', 'message', 'result', 'status')) {
+      $prop = $obj.PSObject.Properties[$key]
+      if ($null -eq $prop) { continue }
+      $candidate = Normalize-OneLine -Text ([string]$prop.Value) -TrimPrefixes $TrimPrefixes -MaxElements $MaxElements
+      if (-not [string]::IsNullOrWhiteSpace($candidate)) { return $candidate }
+    }
+  } catch {}
+
+  $fallback = Resolve-I18nTextSafe -Key 'notifications.fallback_success' -LocaleValue $LocaleValue -DefaultText 'Task update received.'
+  return [string]$fallback.text
+}
+
 function New-RuleSummary {
   param(
     [object]$Payload,
@@ -214,13 +245,13 @@ function New-RuleSummary {
     $assistantProp = $Payload.PSObject.Properties['last-assistant-message']
     if ($null -ne $assistantProp) {
       $assistantRaw = Get-MessageLikeText $assistantProp.Value
-      $assistantLine = Normalize-OneLine -Text (Get-FirstContentLine $assistantRaw) -TrimPrefixes $TrimPrefixes -MaxElements 72
+      $assistantLine = Normalize-SummaryForNotification -Text (Get-FirstContentLine $assistantRaw) -TrimPrefixes $TrimPrefixes -MaxElements 72 -LocaleValue $LocaleValue
     }
 
     $inputProp = $Payload.PSObject.Properties['input-messages']
     if ($null -ne $inputProp) {
       $inputRaw = Get-MessageLikeText $inputProp.Value
-      $inputLine = Normalize-OneLine -Text (Get-FirstContentLine $inputRaw) -TrimPrefixes $TrimPrefixes -MaxElements 72
+      $inputLine = Normalize-SummaryForNotification -Text (Get-FirstContentLine $inputRaw) -TrimPrefixes $TrimPrefixes -MaxElements 72 -LocaleValue $LocaleValue
     }
   }
 
@@ -297,12 +328,13 @@ function Test-ShouldNotifyWithFallback {
 
   if (-not $ParseOk) { return [pscustomobject]@{ Notify = $false; Reason = 'skip_parse_failed' } }
   if ($EventType -ne 'agent-turn-complete') { return [pscustomobject]@{ Notify = $false; Reason = 'skip_not_turn_complete' } }
-  if ($SummaryMode -ne 'assistant') { return [pscustomobject]@{ Notify = $false; Reason = 'skip_no_assistant_summary' } }
+  if (@('assistant', 'input', 'fallback_success', 'fallback_stop') -notcontains $SummaryMode) {
+    return [pscustomobject]@{ Notify = $false; Reason = 'skip_no_assistant_summary' }
+  }
   if ([string]::IsNullOrWhiteSpace($ThreadId)) { return [pscustomobject]@{ Notify = $false; Reason = 'skip_missing_thread_id' } }
   if ([string]::IsNullOrWhiteSpace($SummaryText)) { return [pscustomobject]@{ Notify = $false; Reason = 'skip_empty_summary' } }
 
   $summary = $SummaryText.Trim()
-  if ($summary -match '^[\{\[]') { return [pscustomobject]@{ Notify = $false; Reason = 'skip_summary_json_like' } }
   if ($summary -match '^\d+[\.\)]\s+') { return [pscustomobject]@{ Notify = $false; Reason = 'skip_summary_list_item' } }
   if ($summary -match '\*\*$' -and $summary -notmatch '[。.!?！？]$') { return [pscustomobject]@{ Notify = $false; Reason = 'skip_summary_heading_like' } }
 

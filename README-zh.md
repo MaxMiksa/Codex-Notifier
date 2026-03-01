@@ -12,8 +12,8 @@
 ✅ **支持点击跳转到对应 Codex 窗口 | 支持 VS Code Codex 插件 | 支持多窗口 Codex 并行 | 支持所有 Codex 版本**  
 ✅ **一句 Prompt 自动安装与校验 | Windows | 简单 Hooks 链路**
 
-Codex-Notifier 用于把 Codex 在任务完成时进行提醒时间。  
-它不改变你的 Codex 工作流，只增加可靠提醒和点击回焦能力。
+Codex-Notifier 让 Codex 在任务完成时主动提醒你（通过弹窗和声音）。  
+它不改变你的 Codex 工作流。
 
 ## 可视化演示
 

@@ -12,8 +12,8 @@
 ✅ **Click to jump back to the related Codex window | Supports VS Code Codex extension | Multi-window Codex parallel sessions | Supports all Codex versions**  
 ✅ **One-line prompt for automated install and verification | Windows | Simple hooks pipeline**
 
-Codex-Notifier turns Codex task completion into reliable desktop feedback on Windows.  
-It keeps your existing Codex flow intact while adding predictable notifications and click-to-focus behavior.
+Codex-Notifier actively reminds you when Codex tasks complete (through popup and sound).  
+It does not change your Codex workflow.
 
 ## Visual Demo
 

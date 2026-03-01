@@ -9,8 +9,9 @@
 </p>
 
 ✅ **Hook-only architecture | Local notifications | Click-to-jump VSCode workspace | Works with multi-window Codex sessions**  
-✅ **Task completion popup | Soft sound prompt | Notification dedup and fallback routing**  
-✅ **Windows + PowerShell | Codex CLI hooks | VSCode workspace title matching**
+✅ **Task completion popup | Soft sound prompt**  
+✅ **Windows | Codex CLI hooks | VSCode workspace title matching**
+✅ **One-line Prompt Install | Send to Codex for automated install and verification**
 
 Codex-Notifier turns Codex task completion into reliable desktop feedback on Windows.  
 It keeps your existing Codex flow intact while adding predictable notifications and click-to-focus behavior.
@@ -21,7 +22,7 @@ It keeps your existing Codex flow intact while adding predictable notifications 
   <img src="docs/demo/image.png" alt="Codex-Notifier demo" width="760" />
 </p>
 
-## Features
+## Features  
 
 | Feature | Description |
 | :--- | :--- |
@@ -31,28 +32,24 @@ It keeps your existing Codex flow intact while adding predictable notifications 
 | **🧪 Operational Scripts** | Includes `install`, `doctor`, and `uninstall` scripts for setup, validation, and rollback. |
 | **🌐 i18n/l10n Scaffold** | Supports `en-US` + `zh-CN`, CLDR formatting, ICU plural templates, and pseudo RTL (`ar-XB`) validation. |
 
-## Compliance (Global Minimal)
+## Install Prompt (Send to Codex)
 
-- Privacy notice: notifications are generated from local runtime events.
-- Local processing: payload parsing and window matching run on-device.
-- No upload: Codex-Notifier does not forward payload content to external services.
-- Audit log: operational metadata is stored in local JSONL logs.
+`Please install Codex-Notifier on Windows: clone https://github.com/MaxMiksa/Codex-Notifier, run scripts/install.ps1; if a Stop hook conflict appears, merge ~/.codex/config.toml using templates/stop-hook.snippet.toml while keeping existing hooks; then run scripts/doctor.ps1 and report back.`
 
-## Usage (Happy Path)
+<details>
+  <summary>(Optional) Manual install and verification</summary>
 
-1. Open a terminal in this repo and run:
+1. Run the installer in the repository directory:
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ```
-2. Ask Codex to run any small task, for example:
+2. Ask Codex to execute a minimal task, for example:
 ```powershell
 codex exec "say hi"
 ```
-3. When completion notification appears, click it to jump back to the related VSCode window.
+3. When completion notification appears, click the balloon to jump back to the matching VSCode window.
 
-## One-line AI Install Prompt
-
-`Please install Codex-Notifier on Windows: clone https://github.com/MaxMiksa/Codex-Notifier, run scripts/install.ps1; if Stop hook conflict appears, merge ~/.codex/config.toml using templates/stop-hook.snippet.toml while keeping existing hooks; then run scripts/doctor.ps1 and report.`
+</details>
 
 <details>
   <summary>Requirements & Limits</summary>
@@ -65,6 +62,16 @@ codex exec "say hi"
 </details>
 
 <details>
+  <summary>Compliance (Global Minimal)</summary>
+
+- Privacy notice: notifications are generated only from local runtime events.
+- Local processing: payload parsing and window matching are performed on-device.
+- No upload: Codex-Notifier does not forward payload content to external services.
+- Audit log: runtime metadata is recorded in local JSONL logs.
+
+</details>
+
+<details>
   <summary>Developer Guide</summary>
 
 - Install to real Codex home:
@@ -73,7 +80,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexHome "
 ```
 - Force locale/legal profile:
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Locale "en-US" -LegalProfile "global-minimal"
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Locale "zh-CN" -LegalProfile "global-minimal"
 ```
 - Validate installation:
 ```powershell
@@ -87,7 +94,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\uninstall.ps1
 </details>
 
 <details>
-  <summary>Troubleshooting / Known Issues</summary>
+  <summary>Troubleshooting</summary>
 
 - If install returns `conflict_manual_merge_required` (`exit 20`), merge the stop hook snippet manually.
 - If click jump does not hit expected workspace, verify window title contains `- <workspace> - Visual Studio Code`.
@@ -101,3 +108,4 @@ Welcome to submit Issues and Pull Requests!
 Any questions or suggestions? Please contact Zheyuan (Max) Kong (Carnegie Mellon University, Pittsburgh, PA).
 
 Zheyuan (Max) Kong: kongzheyuan@outlook.com | zheyuank@andrew.cmu.edu
+

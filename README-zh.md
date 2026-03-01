@@ -8,11 +8,12 @@
   <a href="README.md">English</a>
 </p>
 
-✅ **纯 Hooks 链路 | 本地桌面通知 | 点击跳转 VSCode 工作区 | 支持多窗口 Codex 并行**  
-✅ **任务完成弹窗 | 柔和提示音 | 去重过滤与兜底跳转**  
-✅ **Windows + PowerShell | Codex CLI hooks | 基于窗口标题匹配工作区**
+✅ **简单 Hooks 链路 | 本地桌面通知 | 点击跳转到对应 VSCode 窗口 | 支持多窗口 Codex 并行**  
+✅ **任务完成弹窗 | 柔和提示音**  
+✅ **Windows | Codex CLI hooks | 基于窗口标题匹配工作区**
+✅ **一句 Prompt 安装 | 发给 Codex 自动执行安装与校验**
 
-Codex-Notifier 用于把 Codex 的任务完成状态稳定地变成桌面反馈。  
+Codex-Notifier 用于把 Codex 在任务完成时进行提醒时间。  
 它不改变你的 Codex 工作流，只增加可靠提醒和点击回焦能力。
 
 ## 可视化演示
@@ -31,14 +32,13 @@ Codex-Notifier 用于把 Codex 的任务完成状态稳定地变成桌面反馈�
 | **🧪 运维脚本齐全** | 提供 `install`、`doctor`、`uninstall` 三件套，覆盖安装、校验与回滚。 |
 | **🌐 i18n/l10n 脚手架** | 支持 `en-US` + `zh-CN`、CLDR 格式化、ICU 复数模板与伪 RTL（`ar-XB`）验证。 |
 
-## 合规说明（Global Minimal）
 
-- 隐私说明：通知仅基于本地运行事件生成。  
-- 本地处理：payload 解析与窗口匹配均在设备本地完成。  
-- 不上传数据：Codex-Notifier 不会向外部服务转发 payload 内容。  
-- 审计日志：运行元数据记录在本地 JSONL 日志中。  
+## 安装 Prompt （发给Codex即可）
 
-## 使用方式（推荐路径）
+`请在 Windows 上帮我安装 Codex-Notifier：克隆 https://github.com/MaxMiksa/Codex-Notifier，执行 scripts/install.ps1；若提示 Stop 冲突，按 templates/stop-hook.snippet.toml 合并 ~/.codex/config.toml（保留原有 hooks）；再执行 scripts/doctor.ps1 并汇报。`
+
+<details>
+  <summary>（可选）手动安装和测试方式</summary>
 
 1. 在仓库目录执行安装：
 ```powershell
@@ -50,9 +50,7 @@ codex exec "say hi"
 ```
 3. 出现完成通知后点击气泡，即可跳转回对应 VSCode 窗口。
 
-## 一句 Prompt 安装
-
-`请在 Windows 上帮我安装 Codex-Notifier：克隆 https://github.com/MaxMiksa/Codex-Notifier，执行 scripts/install.ps1；若提示 Stop 冲突，按 templates/stop-hook.snippet.toml 合并 ~/.codex/config.toml（保留原有 hooks）；再执行 scripts/doctor.ps1 并汇报。`
+</details>
 
 <details>
   <summary>环境要求与限制</summary>
@@ -61,6 +59,16 @@ codex exec "say hi"
 - 默认假设已安装 Codex CLI 与 VSCode。
 - v0.2.2 当前仅支持 Windows。
 - 气泡点击回调仅保证在通知展示窗口内有效，系统通知中心历史项不保证可回调。
+
+</details>
+
+<details>
+  <summary>合规说明（Global Minimal）</summary>
+
+- 隐私说明：通知仅基于本地运行事件生成。  
+- 本地处理：payload 解析与窗口匹配均在设备本地完成。  
+- 不上传数据：Codex-Notifier 不会向外部服务转发 payload 内容。  
+- 审计日志：运行元数据记录在本地 JSONL 日志中。  
 
 </details>
 
@@ -87,7 +95,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\uninstall.ps1
 </details>
 
 <details>
-  <summary>故障排查 / 已知问题</summary>
+  <summary>故障排查</summary>
 
 - 若安装返回 `conflict_manual_merge_required`（`exit 20`），请按模板手动合并 Stop Hook。
 - 若点击未跳到目标窗口，先确认窗口标题包含 `- <workspace> - Visual Studio Code`。

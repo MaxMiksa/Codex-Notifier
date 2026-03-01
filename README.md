@@ -9,7 +9,7 @@
 </p>
 
 ✅ **Get notified immediately when Codex tasks finish | Native desktop toast popup | Native notification sound**  
-✅ **Click to jump back to the related Codex window | Supports VS Code Codex extension and CLI | Multi-window Codex parallel sessions | Supports all Codex versions**  
+✅ **Click to jump back to the related Codex window | Supports VS Code Codex extension | Multi-window Codex parallel sessions | Supports all Codex versions**  
 ✅ **One-line prompt for automated install and verification | Windows | Simple hooks pipeline**
 
 Codex-Notifier turns Codex task completion into reliable desktop feedback on Windows.  

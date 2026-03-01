@@ -9,7 +9,7 @@
 </p>
 
 ✅ **Codex任务完成后立刻通知你 | 原生桌面级消息弹窗 | 原生消息提示音**  
-✅ **支持点击跳转到对应 Codex 窗口 | 支持 VS Code Codex 插件和 Cli 命令行 | 支持多窗口 Codex 并行 | 支持所有 Codex 版本**  
+✅ **支持点击跳转到对应 Codex 窗口 | 支持 VS Code Codex 插件 | 支持多窗口 Codex 并行 | 支持所有 Codex 版本**  
 ✅ **一句 Prompt 自动安装与校验 | Windows | 简单 Hooks 链路**
 
 Codex-Notifier 用于把 Codex 在任务完成时进行提醒时间。  

@@ -8,10 +8,9 @@
   <a href="README.md">English</a>
 </p>
 
-✅ **简单 Hooks 链路 | 本地桌面通知 | 点击跳转到对应 VSCode 窗口 | 支持多窗口 Codex 并行**  
-✅ **任务完成弹窗 | 柔和提示音**  
-✅ **Windows | Codex CLI hooks | 基于窗口标题匹配工作区**
-✅ **一句 Prompt 安装 | 发给 Codex 自动执行安装与校验**
+✅ **Codex任务完成后立刻通知你 | 原生桌面级消息弹窗 | 原生消息提示音**  
+✅ **支持点击跳转到对应 Codex 窗口 | 支持 VS Code Codex 插件和 Cli 命令行 | 支持多窗口 Codex 并行 | 支持所有 Codex 版本**  
+✅ **一句 Prompt 自动安装与校验 | Windows | 简单 Hooks 链路**
 
 Codex-Notifier 用于把 Codex 在任务完成时进行提醒时间。  
 它不改变你的 Codex 工作流，只增加可靠提醒和点击回焦能力。

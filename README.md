@@ -8,10 +8,9 @@
   <a href="README-zh.md">中文说明</a>
 </p>
 
-✅ **Hook-only architecture | Local notifications | Click-to-jump VSCode workspace | Works with multi-window Codex sessions**  
-✅ **Task completion popup | Soft sound prompt**  
-✅ **Windows | Codex CLI hooks | VSCode workspace title matching**
-✅ **One-line Prompt Install | Send to Codex for automated install and verification**
+✅ **Get notified immediately when Codex tasks finish | Native desktop toast popup | Native notification sound**  
+✅ **Click to jump back to the related Codex window | Supports VS Code Codex extension and CLI | Multi-window Codex parallel sessions | Supports all Codex versions**  
+✅ **One-line prompt for automated install and verification | Windows | Simple hooks pipeline**
 
 Codex-Notifier turns Codex task completion into reliable desktop feedback on Windows.  
 It keeps your existing Codex flow intact while adding predictable notifications and click-to-focus behavior.

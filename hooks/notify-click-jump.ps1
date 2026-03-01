@@ -200,6 +200,9 @@ public static class CodexWindowApi
     public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
 
     [DllImport("user32.dll")]
+    public static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
 }
 "@
@@ -296,8 +299,10 @@ function Get-TopCodeWindowAny {
 function Try-ActivateWindow {
   param([IntPtr]$Handle)
   try {
-    [void][CodexWindowApi]::ShowWindowAsync($Handle, 9)
-    Start-Sleep -Milliseconds 80
+    if ([CodexWindowApi]::IsIconic($Handle)) {
+      [void][CodexWindowApi]::ShowWindowAsync($Handle, 9)
+      Start-Sleep -Milliseconds 80
+    }
     return [CodexWindowApi]::SetForegroundWindow($Handle)
   } catch {
     return $false

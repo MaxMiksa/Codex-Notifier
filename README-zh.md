@@ -5,7 +5,7 @@
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-扩展-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/badge/许可证-MIT-green.svg" /></a>
   &nbsp;&nbsp;
-  <a href="README.md">English</a>
+  <a href="README.md"><kbd>[English]</kbd></a>
 </p>
 
 ✅ **Codex任务完成后立刻通知你 | 原生桌面级消息弹窗 | 原生消息提示音**  
@@ -15,13 +15,14 @@
 Codex-Notifier 让 Codex 在任务完成时主动提醒你（通过弹窗和声音）。  
 它不改变你的 Codex 工作流。
 
-## 可视化演示
+## 🎬 可视化演示
 
 <p align="center">
-  <img src="docs/demo/image.png" alt="Codex-Notifier 演示" width="760" />
+  <img src="docs/demo/image.png" alt="Codex-Notifier 演示（英文）" width=600 />
+  <img src="docs/demo/image-zh.png" alt="Codex-Notifier 演示（中文）" width=600 />
 </p>
 
-## 功能特性
+## ✨ 功能特性
 
 | 功能 | 说明 |
 | :--- | :--- |
@@ -32,9 +33,11 @@ Codex-Notifier 让 Codex 在任务完成时主动提醒你（通过弹窗和声�
 | **🌐 i18n/l10n 脚手架** | 支持 `en-US` + `zh-CN`、CLDR 格式化、ICU 复数模板与伪 RTL（`ar-XB`）验证。 |
 
 
-## 安装 Prompt （发给Codex即可）
+## 🚀 安装 Prompt （发给Codex即可）
 
 `请在 Windows 上帮我安装 Codex-Notifier：克隆 https://github.com/MaxMiksa/Codex-Notifier，执行 scripts/install.ps1；若提示 Stop 冲突，按 templates/stop-hook.snippet.toml 合并 ~/.codex/config.toml（保留原有 hooks）；再执行 scripts/doctor.ps1 并汇报。`
+
+## 📚 更多信息
 
 <details>
   <summary>（可选）手动安装和测试方式</summary>

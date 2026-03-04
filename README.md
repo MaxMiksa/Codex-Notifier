@@ -5,7 +5,7 @@
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-extension-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
   &nbsp;&nbsp;
-  <a href="README-zh.md">中文说明</a>
+  <a href="README-zh.md"><kbd>[中文说明]</kbd></a>
 </p>
 
 ✅ **Get notified immediately when Codex tasks finish | Native desktop toast popup | Native notification sound**  
@@ -15,13 +15,14 @@
 Codex-Notifier actively reminds you when Codex tasks complete (through popup and sound).  
 It does not change your Codex workflow.
 
-## Visual Demo
+## 🎬 Visual Demo
 
 <p align="center">
-  <img src="docs/demo/image.png" alt="Codex-Notifier demo" width="760" />
+  <img src="docs/demo/image.png" alt="Codex-Notifier demo (English)" width=600 />
+  <img src="docs/demo/image-zh.png" alt="Codex-Notifier demo (Chinese)" width=600 />
 </p>
 
-## Features  
+## ✨ Features  
 
 | Feature | Description |
 | :--- | :--- |
@@ -31,9 +32,11 @@ It does not change your Codex workflow.
 | **🧪 Operational Scripts** | Includes `install`, `doctor`, and `uninstall` scripts for setup, validation, and rollback. |
 | **🌐 i18n/l10n Scaffold** | Supports `en-US` + `zh-CN`, CLDR formatting, ICU plural templates, and pseudo RTL (`ar-XB`) validation. |
 
-## Install Prompt (Send to Codex)
+## 🚀 Install Prompt (Send to Codex)
 
 `Please install Codex-Notifier on Windows: clone https://github.com/MaxMiksa/Codex-Notifier, run scripts/install.ps1; if a Stop hook conflict appears, merge ~/.codex/config.toml using templates/stop-hook.snippet.toml while keeping existing hooks; then run scripts/doctor.ps1 and report back.`
+
+## 📚 More Info
 
 <details>
   <summary>(Optional) Manual install and verification</summary>

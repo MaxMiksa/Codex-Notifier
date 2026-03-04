@@ -39,8 +39,6 @@ Codex-Notifier 让 Codex 在任务完成时主动提醒你（通过弹窗和声�
 请在 Windows 上帮我安装 Codex-Notifier：克隆 https://github.com/MaxMiksa/Codex-Notifier，执行 scripts/install.ps1；若提示 Stop 冲突，按 templates/stop-hook.snippet.toml 合并 ~/.codex/config.toml（保留原有 hooks）；再执行 scripts/doctor.ps1 并汇报。
 ```
 
-## 📚 更多信息
-
 <details>
   <summary>（可选）手动安装和测试方式</summary>
 
@@ -55,6 +53,8 @@ codex exec "say hi"
 3. 出现完成通知后点击气泡，即可跳转回对应 VSCode 窗口。
 
 </details>
+
+## 📚 更多信息
 
 <details>
   <summary>环境要求与限制</summary>

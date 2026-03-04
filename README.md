@@ -38,8 +38,6 @@ It does not change your Codex workflow.
 Please install Codex-Notifier on Windows: clone https://github.com/MaxMiksa/Codex-Notifier, run scripts/install.ps1; if a Stop hook conflict appears, merge ~/.codex/config.toml using templates/stop-hook.snippet.toml while keeping existing hooks; then run scripts/doctor.ps1 and report back.
 ```
 
-## 📚 More Info
-
 <details>
   <summary>(Optional) Manual install and verification</summary>
 
@@ -54,6 +52,8 @@ codex exec "say hi"
 3. When completion notification appears, click the balloon to jump back to the matching VSCode window.
 
 </details>
+
+## 📚 More Info
 
 <details>
   <summary>Requirements & Limits</summary>

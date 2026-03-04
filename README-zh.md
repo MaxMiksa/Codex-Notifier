@@ -26,16 +26,18 @@ Codex-Notifier 让 Codex 在任务完成时主动提醒你（通过弹窗和声�
 
 | 功能 | 说明 |
 | :--- | :--- |
-| **🔔 基于 Hook 的通知** | 使用 `hooks.Stop` 触发完成通知，不依赖 MCP 或 Skills 运行链路。 |
-| **🖱 点击跳转 VSCode** | 点击气泡优先激活匹配工作区窗口，失败时回退 `code -r <cwd>`。 |
-| **🧩 安全配置合并** | 安装器以受管标记合并 `~/.codex/config.toml`，冲突时返回 `exit 20`。 |
-| **🧪 运维脚本齐全** | 提供 `install`、`doctor`、`uninstall` 三件套，覆盖安装、校验与回滚。 |
-| **🌐 i18n/l10n 脚手架** | 支持 `en-US` + `zh-CN`、CLDR 格式化、ICU 复数模板与伪 RTL（`ar-XB`）验证。 |
+| **基于 Hook 的通知** | 使用 `hooks.Stop` 触发完成通知，不依赖 MCP 或 Skills 运行链路。 |
+| **点击跳转 VSCode** | 点击气泡优先激活匹配工作区窗口，失败时回退 `code -r <cwd>`。 |
+| **安全配置合并** | 安装器以受管标记合并 `~/.codex/config.toml`，冲突时返回 `exit 20`。 |
+| **运维脚本齐全** | 提供 `install`、`doctor`、`uninstall` 三件套，覆盖安装、校验与回滚。 |
+| **i18n/l10n 脚手架** | 支持 `en-US` + `zh-CN`、CLDR 格式化、ICU 复数模板与伪 RTL（`ar-XB`）验证。 |
 
 
 ## 🚀 安装 Prompt （发给Codex即可）
 
-`请在 Windows 上帮我安装 Codex-Notifier：克隆 https://github.com/MaxMiksa/Codex-Notifier，执行 scripts/install.ps1；若提示 Stop 冲突，按 templates/stop-hook.snippet.toml 合并 ~/.codex/config.toml（保留原有 hooks）；再执行 scripts/doctor.ps1 并汇报。`
+```text
+请在 Windows 上帮我安装 Codex-Notifier：克隆 https://github.com/MaxMiksa/Codex-Notifier，执行 scripts/install.ps1；若提示 Stop 冲突，按 templates/stop-hook.snippet.toml 合并 ~/.codex/config.toml（保留原有 hooks）；再执行 scripts/doctor.ps1 并汇报。
+```
 
 ## 📚 更多信息
 

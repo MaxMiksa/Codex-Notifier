@@ -26,15 +26,17 @@ It does not change your Codex workflow.
 
 | Feature | Description |
 | :--- | :--- |
-| **🔔 Hook-based Notification** | Uses `hooks.Stop` to trigger completion notifications without MCP or skill runtime dependencies. |
-| **🖱 Click-to-Jump VSCode** | Clicking the balloon focuses the matching VSCode workspace window first; falls back to `code -r <cwd>`. |
-| **🧩 Safe Config Merge** | Installer merges `~/.codex/config.toml` with managed markers and conflict detection (`exit 20`). |
-| **🧪 Operational Scripts** | Includes `install`, `doctor`, and `uninstall` scripts for setup, validation, and rollback. |
-| **🌐 i18n/l10n Scaffold** | Supports `en-US` + `zh-CN`, CLDR formatting, ICU plural templates, and pseudo RTL (`ar-XB`) validation. |
+| **Hook-based Notification** | Uses `hooks.Stop` to trigger completion notifications without MCP or skill runtime dependencies. |
+| **Click-to-Jump VSCode** | Clicking the balloon focuses the matching VSCode workspace window first; falls back to `code -r <cwd>`. |
+| **Safe Config Merge** | Installer merges `~/.codex/config.toml` with managed markers and conflict detection (`exit 20`). |
+| **Operational Scripts** | Includes `install`, `doctor`, and `uninstall` scripts for setup, validation, and rollback. |
+| **i18n/l10n Scaffold** | Supports `en-US` + `zh-CN`, CLDR formatting, ICU plural templates, and pseudo RTL (`ar-XB`) validation. |
 
 ## 🚀 Install Prompt (Send to Codex)
 
-`Please install Codex-Notifier on Windows: clone https://github.com/MaxMiksa/Codex-Notifier, run scripts/install.ps1; if a Stop hook conflict appears, merge ~/.codex/config.toml using templates/stop-hook.snippet.toml while keeping existing hooks; then run scripts/doctor.ps1 and report back.`
+```text
+Please install Codex-Notifier on Windows: clone https://github.com/MaxMiksa/Codex-Notifier, run scripts/install.ps1; if a Stop hook conflict appears, merge ~/.codex/config.toml using templates/stop-hook.snippet.toml while keeping existing hooks; then run scripts/doctor.ps1 and report back.
+```
 
 ## 📚 More Info
 

@@ -5,32 +5,33 @@
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-扩展-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/badge/许可证-MIT-green.svg" /></a>
   &nbsp;&nbsp;
-  <a href="README.md"><kbd>[English]</kbd></a>
+  <a href="README.md"><img alt="[English]" src="https://img.shields.io/badge/%5BEnglish%5D-2f3640.svg" /></a>
 </p>
 
 ✅ **Codex任务完成后立刻通知你 | 原生桌面级消息弹窗 | 原生消息提示音**  
-✅ **支持点击跳转到对应 Codex 窗口 | 支持 VS Code Codex 插件 | 支持多窗口 Codex 并行 | 支持所有 Codex 版本**  
-✅ **一句 Prompt 自动安装与校验 | Windows | 简单 Hooks 链路**
+✅ **支持点击跳转到对应 VS Code 窗口 | 支持多窗口 Codex 并行 | 支持所有 Codex 版本**  
+✅ **一句 Prompt 自动安装与校验 | Windows | VS Code Codex 插件 | 简单 Hooks 链路**
 
 Codex-Notifier 让 Codex 在任务完成时主动提醒你（通过弹窗和声音）。  
 它不改变你的 Codex 工作流。
 
-## 🎬 可视化演示
+## 🎬 演示
 
 <p align="center">
   <img src="docs/demo/image.png" alt="Codex-Notifier 演示（英文）" width=600 />
   <img src="docs/demo/image-zh.png" alt="Codex-Notifier 演示（中文）" width=600 />
 </p>
 
-## ✨ 功能特性
+## ✨ 功能
 
 | 功能 | 说明 |
 | :--- | :--- |
-| **基于 Hook 的通知** | 使用 `hooks.Stop` 触发完成通知，不依赖 MCP 或 Skills 运行链路。 |
-| **点击跳转 VSCode** | 点击气泡优先激活匹配工作区窗口，失败时回退 `code -r <cwd>`。 |
-| **安全配置合并** | 安装器以受管标记合并 `~/.codex/config.toml`，冲突时返回 `exit 20`。 |
-| **运维脚本齐全** | 提供 `install`、`doctor`、`uninstall` 三件套，覆盖安装、校验与回滚。 |
-| **i18n/l10n 脚手架** | 支持 `en-US` + `zh-CN`、CLDR 格式化、ICU 复数模板与伪 RTL（`ar-XB`）验证。 |
+| **基于 Hook 的通知** | Codex 任务一结束，就会弹出桌面通知并播放提示音。 |
+| **点击跳转 VSCode** | 点击通知即可回到对应的 VS Code 窗口。 |
+| **安全配置合并** | 安装时会尽量保留你原有配置，只补充本工具需要的内容。 |
+| **运维脚本齐全** | 自带安装、体检、卸载脚本，按步骤执行即可。 |
+| **支持中英双语** | 提供中文与英文文档及安装 Prompt，便于不同语言用户快速上手。 |
+| **i18n/l10n 脚手架** | 从一开始就按多语言方式组织，后续扩展语言更轻松。 |
 
 
 ## 🚀 安装 Prompt （发给Codex即可）
@@ -54,7 +55,7 @@ codex exec "say hi"
 
 </details>
 
-## 📚 更多信息
+## 📚 更多
 
 <details>
   <summary>环境要求与限制</summary>

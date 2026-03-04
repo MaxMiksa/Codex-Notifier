@@ -5,32 +5,33 @@
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-extension-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
   &nbsp;&nbsp;
-  <a href="README-zh.md"><kbd>[中文说明]</kbd></a>
+  <a href="README-zh.md"><img alt="[中文说明]" src="https://img.shields.io/badge/%5B%E4%B8%AD%E6%96%87%E8%AF%B4%E6%98%8E%5D-2f3640.svg" /></a>
 </p>
 
 ✅ **Get notified immediately when Codex tasks finish | Native desktop toast popup | Native notification sound**  
-✅ **Click to jump back to the related Codex window | Supports VS Code Codex extension | Multi-window Codex parallel sessions | Supports all Codex versions**  
-✅ **One-line prompt for automated install and verification | Windows | Simple hooks pipeline**
+✅ **Click to jump back to the related VS Code window | Multi-window Codex parallel sessions | Supports all Codex versions**  
+✅ **One-line prompt for automated install and verification | Windows | VS Code Codex extension | Simple hooks pipeline**
 
 Codex-Notifier actively reminds you when Codex tasks complete (through popup and sound).  
 It does not change your Codex workflow.
 
-## 🎬 Visual Demo
+## 🎬 Demo
 
 <p align="center">
   <img src="docs/demo/image.png" alt="Codex-Notifier demo (English)" width=600 />
   <img src="docs/demo/image-zh.png" alt="Codex-Notifier demo (Chinese)" width=600 />
 </p>
 
-## ✨ Features  
+## ✨ Features
 
 | Feature | Description |
 | :--- | :--- |
-| **Hook-based Notification** | Uses `hooks.Stop` to trigger completion notifications without MCP or skill runtime dependencies. |
-| **Click-to-Jump VSCode** | Clicking the balloon focuses the matching VSCode workspace window first; falls back to `code -r <cwd>`. |
-| **Safe Config Merge** | Installer merges `~/.codex/config.toml` with managed markers and conflict detection (`exit 20`). |
-| **Operational Scripts** | Includes `install`, `doctor`, and `uninstall` scripts for setup, validation, and rollback. |
-| **i18n/l10n Scaffold** | Supports `en-US` + `zh-CN`, CLDR formatting, ICU plural templates, and pseudo RTL (`ar-XB`) validation. |
+| **Hook-based Notification** | Shows a desktop alert and sound as soon as a Codex task finishes. |
+| **Click-to-Jump VSCode** | Click the notification to jump back to the related VS Code window. |
+| **Safe Config Merge** | Keeps your existing Codex settings and only adds what this tool needs. |
+| **Operational Scripts** | Includes ready-to-run scripts for install, health check, and uninstall. |
+| **Bilingual CN/EN** | Includes both Chinese and English docs and install prompts. |
+| **i18n/l10n Scaffold** | Built for multi-language growth so bilingual content stays consistent over time. |
 
 ## 🚀 Install Prompt (Send to Codex)
 

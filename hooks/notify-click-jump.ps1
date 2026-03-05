@@ -28,7 +28,12 @@ param(
   [string]$Dir = 'auto',
   [string]$LegalProfile = 'global-minimal',
   [string]$I18nFallbackUsed = 'false',
-  [string]$MessageKey = ''
+  [string]$MessageKey = '',
+  [string]$ClientOriginator = '',
+  [string]$ClientSource = '',
+  [string]$ClientOriginatorField = '',
+  [string]$ClientSourceField = '',
+  [string]$ClientAllowlisted = 'false'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -366,6 +371,11 @@ try {
       $LegalProfile = Get-ContextString -Context $ctx -Name 'legal_profile' -Default $LegalProfile
       $I18nFallbackUsed = [string](Get-ContextRaw -Context $ctx -Name 'i18n_fallback_used')
       $MessageKey = Get-ContextString -Context $ctx -Name 'message_key' -Default $MessageKey
+      $ClientOriginator = Get-ContextString -Context $ctx -Name 'client_originator' -Default $ClientOriginator
+      $ClientSource = Get-ContextString -Context $ctx -Name 'client_source' -Default $ClientSource
+      $ClientOriginatorField = Get-ContextString -Context $ctx -Name 'client_originator_field' -Default $ClientOriginatorField
+      $ClientSourceField = Get-ContextString -Context $ctx -Name 'client_source_field' -Default $ClientSourceField
+      $ClientAllowlisted = [string](Get-ContextRaw -Context $ctx -Name 'client_allowlisted')
     }
   }
 
@@ -377,6 +387,7 @@ try {
   $notifyDuration = Convert-ToInt $NotifyDurationMs 2500
   $clickWait = Convert-ToInt $ClickWaitMs 8000
   $i18nFallbackUsedBool = Convert-ToBool $I18nFallbackUsed
+  $clientAllowlistedBool = Convert-ToBool $ClientAllowlisted
 
   $localeInfo = Resolve-NotifierLocale -Locale $Locale
   $dirInfo = Resolve-NotifierDirection -Dir $Dir -Locale $localeInfo.locale
@@ -605,6 +616,11 @@ try {
       legal_profile = $effectiveLegalProfile
       i18n_fallback_used = [bool]$i18nFallbackUsedBool
       message_key = $MessageKey
+      client_originator = if ([string]::IsNullOrWhiteSpace($ClientOriginator)) { $null } else { $ClientOriginator }
+      client_source = if ([string]::IsNullOrWhiteSpace($ClientSource)) { $null } else { $ClientSource }
+      client_originator_field = if ([string]::IsNullOrWhiteSpace($ClientOriginatorField)) { $null } else { $ClientOriginatorField }
+      client_source_field = if ([string]::IsNullOrWhiteSpace($ClientSourceField)) { $null } else { $ClientSourceField }
+      client_allowlisted = [bool]$clientAllowlistedBool
     }
     $line = $record | ConvertTo-Json -Compress
     Add-Content -LiteralPath $logPath -Value $line -Encoding utf8

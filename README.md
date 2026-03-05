@@ -1,7 +1,7 @@
 <h1 align="center">Codex-Notifier</h1>
 
 <p align="center">
-  <a href="#"><img alt="Version" src="https://img.shields.io/badge/version-v0.2.3-blue.svg" /></a>
+  <a href="#"><img alt="Version" src="https://img.shields.io/badge/version-v0.2.4-blue.svg" /></a>
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-extension-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
   &nbsp;&nbsp;
@@ -27,6 +27,7 @@ It does not change your Codex workflow.
 | Feature | Description |
 | :--- | :--- |
 | **Hook-based Notification** | Shows a desktop alert and sound as soon as a Codex task finishes. |
+| **Client-scoped Delivery** | Triggers only for Codex CLI and VS Code extension sessions; Codex Desktop sessions are ignored. |
 | **Click-to-Jump VSCode** | Click the notification to jump back to the related VS Code window. |
 | **Safe Config Merge** | Keeps your existing Codex settings and only adds what this tool needs. |
 | **Operational Scripts** | Includes ready-to-run scripts for install, health check, and uninstall. |
@@ -61,7 +62,8 @@ codex exec "say hi"
 
 - Windows + PowerShell (`pwsh.exe`) required.
 - Codex CLI and VSCode are expected to be installed.
-- v0.2.3 targets Windows only.
+- v0.2.4 targets Windows only.
+- Notifications are scoped to Codex CLI and VS Code extension sessions; Codex Desktop sessions are intentionally skipped.
 - Balloon click callback works within the active notification window, not guaranteed from historical Action Center entries.
 
 </details>

@@ -1,7 +1,7 @@
 <h1 align="center">Codex-Notifier</h1>
 
 <p align="center">
-  <a href="#"><img alt="版本" src="https://img.shields.io/badge/版本-v0.2.3-blue.svg" /></a>
+  <a href="#"><img alt="版本" src="https://img.shields.io/badge/版本-v0.2.4-blue.svg" /></a>
   <a href="#"><img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-扩展-007ACC.svg" /></a>
   <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/badge/许可证-MIT-green.svg" /></a>
   &nbsp;&nbsp;
@@ -27,6 +27,7 @@ Codex-Notifier 让 Codex 在任务完成时主动提醒你（通过弹窗和声�
 | 功能 | 说明 |
 | :--- | :--- |
 | **基于 Hook 的通知** | Codex 任务一结束，就会弹出桌面通知并播放提示音。 |
+| **客户端范围控制** | 仅在 Codex CLI 与 VS Code 扩展会话中触发；Codex Desktop 会话默认不提醒。 |
 | **点击跳转 VSCode** | 点击通知即可回到对应的 VS Code 窗口。 |
 | **安全配置合并** | 安装时会尽量保留你原有配置，只补充本工具需要的内容。 |
 | **运维脚本齐全** | 自带安装、体检、卸载脚本，按步骤执行即可。 |
@@ -62,7 +63,8 @@ codex exec "say hi"
 
 - 需要 Windows + PowerShell (`pwsh.exe`)。
 - 默认假设已安装 Codex CLI 与 VSCode。
-- v0.2.3 当前仅支持 Windows。
+- v0.2.4 当前仅支持 Windows。
+- 通知当前仅面向 Codex CLI 与 VS Code 扩展会话；Codex Desktop 会话会被有意跳过。
 - 气泡点击回调仅保证在通知展示窗口内有效，系统通知中心历史项不保证可回调。
 
 </details>

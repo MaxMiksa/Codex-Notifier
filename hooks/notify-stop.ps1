@@ -371,6 +371,116 @@ function Test-ShouldNotifyWithFallback {
   return [pscustomobject]@{ Notify = $true; Reason = 'notify_fallback_rules_passed' }
 }
 
+function Get-ClientIdentity {
+  param([object]$Payload)
+
+  $result = [ordered]@{
+    originator = $null
+    source = $null
+    originator_field = $null
+    source_field = $null
+  }
+  if ($null -eq $Payload) {
+    return [pscustomobject]$result
+  }
+
+  $hookEventObj = $null
+  if ($Payload.PSObject.Properties.Name -contains 'hook_event') {
+    $hookEventObj = $Payload.hook_event
+  }
+
+  foreach ($candidate in @(
+      @{ Obj = $Payload; Name = 'originator'; Field = 'payload.originator' },
+      @{ Obj = $hookEventObj; Name = 'originator'; Field = 'payload.hook_event.originator' },
+      @{ Obj = $Payload; Name = 'source'; Field = 'payload.source' },
+      @{ Obj = $hookEventObj; Name = 'source'; Field = 'payload.hook_event.source' }
+    )) {
+    if ($null -eq $candidate.Obj) { continue }
+    $prop = $candidate.Obj.PSObject.Properties[$candidate.Name]
+    if ($null -eq $prop) { continue }
+    $val = [string]$prop.Value
+    if ([string]::IsNullOrWhiteSpace($val)) { continue }
+    if ($candidate.Name -eq 'originator' -and [string]::IsNullOrWhiteSpace([string]$result.originator)) {
+      $result.originator = $val
+      $result.originator_field = $candidate.Field
+    }
+    if ($candidate.Name -eq 'source' -and [string]::IsNullOrWhiteSpace([string]$result.source)) {
+      $result.source = $val
+      $result.source_field = $candidate.Field
+    }
+  }
+
+  foreach ($clientHolder in @(
+      @{ Obj = $Payload; Field = 'payload.client' },
+      @{ Obj = $hookEventObj; Field = 'payload.hook_event.client' }
+    )) {
+    if ($null -eq $clientHolder.Obj) { continue }
+    $clientProp = $clientHolder.Obj.PSObject.Properties['client']
+    if ($null -eq $clientProp) { continue }
+    $clientValue = $clientProp.Value
+
+    if ($clientValue -is [string]) {
+      if ([string]::IsNullOrWhiteSpace([string]$result.originator)) {
+        $result.originator = [string]$clientValue
+        $result.originator_field = $clientHolder.Field
+      }
+      continue
+    }
+
+    if ($null -eq $clientValue) { continue }
+    foreach ($name in @('originator', 'name', 'id', 'client_id', 'type')) {
+      $inner = $clientValue.PSObject.Properties[$name]
+      if ($null -eq $inner) { continue }
+      $innerVal = [string]$inner.Value
+      if ([string]::IsNullOrWhiteSpace($innerVal)) { continue }
+      if ([string]::IsNullOrWhiteSpace([string]$result.originator)) {
+        $result.originator = $innerVal
+        $result.originator_field = "$($clientHolder.Field).$name"
+      }
+      break
+    }
+
+    foreach ($name in @('source')) {
+      $inner = $clientValue.PSObject.Properties[$name]
+      if ($null -eq $inner) { continue }
+      $innerVal = [string]$inner.Value
+      if ([string]::IsNullOrWhiteSpace($innerVal)) { continue }
+      if ([string]::IsNullOrWhiteSpace([string]$result.source)) {
+        $result.source = $innerVal
+        $result.source_field = "$($clientHolder.Field).$name"
+      }
+      break
+    }
+  }
+
+  return [pscustomobject]$result
+}
+
+function Test-ClientAllowlisted {
+  param(
+    [string]$ClientOriginator,
+    [string]$ClientSource
+  )
+
+  $allowedOriginators = @('codex_cli_rs', 'codex_vscode', 'codex-tui', 'vs code')
+  $allowedSources = @('cli', 'vscode', 'exec')
+  $blockedOriginators = @('codex desktop')
+
+  $originatorNormalized = if ([string]::IsNullOrWhiteSpace($ClientOriginator)) { '' } else { $ClientOriginator.Trim().ToLowerInvariant() }
+  $sourceNormalized = if ([string]::IsNullOrWhiteSpace($ClientSource)) { '' } else { $ClientSource.Trim().ToLowerInvariant() }
+
+  if ($blockedOriginators -contains $originatorNormalized) {
+    return $false
+  }
+  if ($allowedOriginators -contains $originatorNormalized) {
+    return $true
+  }
+  if ($allowedSources -contains $sourceNormalized) {
+    return $true
+  }
+  return $false
+}
+
 function Resolve-TargetCwd {
   param(
     [object]$Payload,
@@ -462,7 +572,12 @@ function Start-ClickNotifyWorker {
     [string]$DirValue,
     [string]$LegalProfileValue,
     [bool]$I18nFallbackUsed,
-    [string]$MessageKey
+    [string]$MessageKey,
+    [string]$ClientOriginator,
+    [string]$ClientSource,
+    [string]$ClientOriginatorField,
+    [string]$ClientSourceField,
+    [bool]$ClientAllowlisted
   )
 
   $clickScriptCandidates = @(
@@ -514,6 +629,11 @@ function Start-ClickNotifyWorker {
       legal_profile = $LegalProfileValue
       i18n_fallback_used = [bool]$I18nFallbackUsed
       message_key = $MessageKey
+      client_originator = $ClientOriginator
+      client_source = $ClientSource
+      client_originator_field = $ClientOriginatorField
+      client_source_field = $ClientSourceField
+      client_allowlisted = [bool]$ClientAllowlisted
     }
     $contextDir = Join-Path $HOME '.codex\hooks\logs'
     if (-not (Test-Path -LiteralPath $contextDir)) {
@@ -692,6 +812,18 @@ try {
     $notifyReason = [string]$fallbackDecision.Reason
   }
 
+  $clientIdentity = Get-ClientIdentity -Payload $payloadObj
+  $clientOriginator = [string]$clientIdentity.originator
+  $clientSource = [string]$clientIdentity.source
+  $clientOriginatorField = [string]$clientIdentity.originator_field
+  $clientSourceField = [string]$clientIdentity.source_field
+  $clientAllowlisted = Test-ClientAllowlisted -ClientOriginator $clientOriginator -ClientSource $clientSource
+  if ($notifySent -and -not $clientAllowlisted) {
+    $mode = 'client_allowlist'
+    $notifySent = $false
+    $notifyReason = 'skip_client_not_allowlisted'
+  }
+
   $timeValue = if (Get-Command -Name Format-I18nTime -ErrorAction SilentlyContinue) {
     Format-I18nTime -Value ([DateTimeOffset]::Now) -Locale $effectiveLocale
   } else {
@@ -765,7 +897,12 @@ try {
       -DirValue $effectiveDir `
       -LegalProfileValue $effectiveLegalProfile `
       -I18nFallbackUsed $i18nFallbackUsed `
-      -MessageKey $messageKey
+      -MessageKey $messageKey `
+      -ClientOriginator $clientOriginator `
+      -ClientSource $clientSource `
+      -ClientOriginatorField $clientOriginatorField `
+      -ClientSourceField $clientSourceField `
+      -ClientAllowlisted $clientAllowlisted
 
     if ($worker.Started) {
       return
@@ -819,6 +956,11 @@ try {
       legal_profile = $effectiveLegalProfile
       i18n_fallback_used = [bool]$i18nFallbackUsed
       message_key = $messageKey
+      client_originator = if ([string]::IsNullOrWhiteSpace($clientOriginator)) { $null } else { $clientOriginator }
+      client_source = if ([string]::IsNullOrWhiteSpace($clientSource)) { $null } else { $clientSource }
+      client_originator_field = if ([string]::IsNullOrWhiteSpace($clientOriginatorField)) { $null } else { $clientOriginatorField }
+      client_source_field = if ([string]::IsNullOrWhiteSpace($clientSourceField)) { $null } else { $clientSourceField }
+      client_allowlisted = [bool]$clientAllowlisted
     }
     $line = $record | ConvertTo-Json -Compress
     Add-Content -LiteralPath $logPath -Value $line -Encoding utf8

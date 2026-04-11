@@ -115,4 +115,4 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\uninstall.ps1
 欢迎提交 Issue 和 Pull Request！  
 如有任何问题或建议，请联系 Zheyuan (Max) Kong (卡内基梅隆大学，宾夕法尼亚州)。
 
-Zheyuan (Max) Kong: kongzheyuan@outlook.com | zheyuank@andrew.cmu.edu
+Zheyuan (Max) Kong: kongzheyuan@outlook.com | zheyuank@tepper.cmu.edu
